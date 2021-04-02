@@ -15,6 +15,9 @@
     'conditions': [
       ['OS == "win"', {
         'defines': ['WIN32'],
+        'variables': {
+          'openssl_root%': 'OpenSSL-win-<(target_arch)',
+        }
       }],
     ],
     'configurations': {
