@@ -15,6 +15,17 @@
     'conditions': [
       ['OS == "win"', {
         'defines': ['WIN32'],
+        'conditions': [
+          ['target_arch == "ia32"', {
+            'variables': {
+              'openssl_root%': 'OpenSSL-Win32',
+            }
+          }, {
+            'variables': {
+              'openssl_root%': 'OpenSSL-Win64',
+            }
+          }]
+        ],
       }],
     ],
     'configurations': {
