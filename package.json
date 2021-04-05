@@ -11,7 +11,6 @@
   },
   "dependencies": {
     "bindings": "^1.5.0",
-    "prebuild-install": "^6.0.1",
     "tar": "^6.1.0"
   },
   "devDependencies": {
@@ -20,12 +19,11 @@
     "fs-extra": "^9.1.0",
     "mocha": "^8.3.2",
     "nodemark": "^0.3.0",
-    "prebuild": "^10.0.1",
     "sqlite": "^4.0.19",
     "sqlite3": "^5.0.2"
   },
   "scripts": {
-    "install": "prebuild-install || npm run build-release",
+    "install": "npm run build-release",
     "build-release": "node-gyp rebuild --release",
     "build-debug": "node-gyp rebuild --debug",
     "rebuild-release": "npm run lzz && npm run build-release",
