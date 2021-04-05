@@ -83,7 +83,7 @@
               '-lcrypt32.lib'
             ],
             'library_dirs': [
-              '<(SHARED_INTERMEDIATE_DIR)/sqlite3/<(openssl_root)'
+              '<(SHARED_INTERMEDIATE_DIR)/sqlite3/>(openssl_root)'
             ]
           }
         },
