@@ -18,6 +18,7 @@ NODE_MODULE_INIT(/* exports, context */) {
 	exports->Set(context, InternalizedFromLatin1(isolate, "StatementIterator"), StatementIterator::Init(isolate, data)).FromJust();
 	exports->Set(context, InternalizedFromLatin1(isolate, "Backup"), Backup::Init(isolate, data)).FromJust();
 	exports->Set(context, InternalizedFromLatin1(isolate, "setErrorConstructor"), v8::FunctionTemplate::New(isolate, Addon::JS_setErrorConstructor, data)->GetFunction(context).ToLocalChecked()).FromJust();
+	exports->Set(context, InternalizedFromLatin1(isolate, "setCorruptionLogger"), v8::FunctionTemplate::New(isolate, Addon::JS_setCorruptionLogger, data)->GetFunction(context).ToLocalChecked()).FromJust();
 
 	// Store addon instance data.
 	addon->Statement.Reset(isolate, v8::Local<v8::Function>::Cast(exports->Get(context, InternalizedFromLatin1(isolate, "Statement")).ToLocalChecked()));
@@ -1669,6 +1670,48 @@ void Addon::JS_setErrorConstructor (v8::FunctionCallbackInfo <v8 :: Value> const
                 if ( info . Length ( ) <= ( 0 ) || ! info [ 0 ] -> IsFunction ( ) ) return ThrowTypeError ( "Expected " "first" " argument to be " "a function" ) ; v8 :: Local < v8 :: Function > SqliteError = v8 :: Local < v8 :: Function > :: Cast ( info [ 0 ] ) ;
                 static_cast < Addon * > ( v8 :: Local < v8 :: External > :: Cast ( info . Data ( ) ) -> Value ( ) ) ->SqliteError.Reset( info . GetIsolate ( ) , SqliteError);
 }
+
+class LogWrapper {
+ public:
+  LogWrapper(
+      v8::Isolate* isolate,
+      v8::Local<v8::Function> fn
+  ): isolate_(isolate) {
+    fn_.Reset(isolate, fn);
+  }
+
+  void Call(const char* msg) {
+    v8::HandleScope scope(isolate_);
+    v8::Local<v8::Function> fn =
+      v8::Local<v8::Function>::New(isolate_, fn_);
+    v8::Local<v8::Value> arg = StringFromUtf8(isolate_, msg, -1);
+    fn->Call(isolate_->GetCurrentContext(), v8::Undefined(isolate_), 1, &arg);
+  }
+
+  static void Fn(void *pArg, int iErrCode, const char *zMsg) {
+    LogWrapper* wrapper = reinterpret_cast<LogWrapper*>(pArg);
+    if (iErrCode == SQLITE_CORRUPT || iErrCode == SQLITE_NOTADB) {
+      wrapper->Call(zMsg);
+    }
+  }
+
+ private:
+  v8::Isolate* isolate_;
+  v8::Persistent<v8::Function> fn_;
+};
+
+void Addon::JS_setCorruptionLogger (v8::FunctionCallbackInfo <v8 :: Value> const & info) {
+  if (info.Length() <= 0)
+    return ThrowTypeError("Expected one argument");
+
+  v8::Local<v8::Function> fn = v8::Local<v8::Function>::Cast(info[0]);
+  int status = sqlite3_config(
+      SQLITE_CONFIG_LOG,
+      LogWrapper::Fn,
+      new LogWrapper(v8::Isolate::GetCurrent(), fn));
+  assert(status == SQLITE_OK);
+}
+
 #line 48 "./src/better_sqlite3.lzz"
 void Addon::Cleanup (void * ptr)
 #line 48 "./src/better_sqlite3.lzz"

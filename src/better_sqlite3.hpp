@@ -665,6 +665,7 @@ struct Addon
   std::set <Database*, Database::CompareDatabase> dbs;
 #line 43 "./src/better_sqlite3.lzz"
   static void JS_setErrorConstructor (v8::FunctionCallbackInfo <v8 :: Value> const & info);
+  static void JS_setCorruptionLogger (v8::FunctionCallbackInfo <v8 :: Value> const & info);
 #line 48 "./src/better_sqlite3.lzz"
   static void Cleanup (void * ptr);
 #line 55 "./src/better_sqlite3.lzz"
