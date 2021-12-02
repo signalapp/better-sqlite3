@@ -20,7 +20,13 @@
             'variables': {
               'openssl_root%': 'OpenSSL-Win32',
             }
-          }, {
+          },
+          'target_arch == "arm64"', {
+            'variables': {
+              'openssl_root%': 'OpenSSL-WinARM64',
+            }
+          },
+          {
             'variables': {
               'openssl_root%': 'OpenSSL-Win64',
             }
