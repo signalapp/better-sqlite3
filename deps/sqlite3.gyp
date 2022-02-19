@@ -95,11 +95,20 @@
             ]
           }
         },
+        # Linux ARM64
+        'target_arch == "árm64"', {
+          'link_settings': {
+            'libraries': [
+              # This statically links libcrypto, whereas -lcrypto would dynamically link it
+              '<(SHARED_INTERMEDIATE_DIR)/sqlite3/OpenSSL-LinuxARM64/libcrypto.a'
+            ]
+          }
+        },
         { # Linux
           'link_settings': {
             'libraries': [
               # This statically links libcrypto, whereas -lcrypto would dynamically link it
-              '<(SHARED_INTERMEDIATE_DIR)/sqlite3/OpenSSL-Linux/libcrypto.a'
+              '<(SHARED_INTERMEDIATE_DIR)/sqlite3/OpenSSL-Linux64/libcrypto.a'
             ]
           }
         }],
