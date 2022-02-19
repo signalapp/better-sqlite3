@@ -96,7 +96,7 @@
           }
         },
         # Linux ARM64
-        'target_arch == "árm64"', {
+        'target_arch == "arm64"', {
           'link_settings': {
             'libraries': [
               # This statically links libcrypto, whereas -lcrypto would dynamically link it
