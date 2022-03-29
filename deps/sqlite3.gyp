@@ -20,50 +20,22 @@
           '<(SHARED_INTERMEDIATE_DIR)/sqlite3/sqlite3.h',
           '<(SHARED_INTERMEDIATE_DIR)/sqlite3/sqlite3ext.h',
         ],
-        'conditions': [
-          ['OS == "win"', {
-            'outputs': [
-              '<(SHARED_INTERMEDIATE_DIR)/sqlite3/>(openssl_root)/libssl.lib',
-              '<(SHARED_INTERMEDIATE_DIR)/sqlite3/>(openssl_root)/libcrypto.lib',
-              '<(SHARED_INTERMEDIATE_DIR)/sqlite3/>(openssl_root)/ossl_static.pdb',
-            ],
-          }],
-        ],
         'action': ['node', 'extract.js', '<(SHARED_INTERMEDIATE_DIR)/sqlite3'],
       }],
     },
     {
-      'target_name': 'copy_dll',
-      'type': 'none',
-      'dependencies': ['locate_sqlite3'],
-      'conditions': [
-        ['OS == "win"', {
-          'copies': [{
-            'files': [
-              '<(SHARED_INTERMEDIATE_DIR)/sqlite3/>(openssl_root)/libssl.lib',
-              '<(SHARED_INTERMEDIATE_DIR)/sqlite3/>(openssl_root)/libcrypto.lib',
-              '<(SHARED_INTERMEDIATE_DIR)/sqlite3/>(openssl_root)/ossl_static.pdb',
-            ],
-            'destination': '<(PRODUCT_DIR)',
-          }],
-        }],
-      ],
-    },
-    {
       'target_name': 'sqlite3',
       'type': 'static_library',
-      'dependencies': ['locate_sqlite3', 'copy_dll'],
-      'sources': ['<(SHARED_INTERMEDIATE_DIR)/sqlite3/sqlite3.c'],
       'include_dirs': [
         '<(SHARED_INTERMEDIATE_DIR)/sqlite3/',
-        '<(SHARED_INTERMEDIATE_DIR)/sqlite3/openssl-include',
       ],
       'direct_dependent_settings': {
         'include_dirs': [
           '<(SHARED_INTERMEDIATE_DIR)/sqlite3/',
-          '<(SHARED_INTERMEDIATE_DIR)/sqlite3/openssl-include',
         ],
       },
+      'dependencies': ['locate_sqlite3'],
+      'sources': ['<(SHARED_INTERMEDIATE_DIR)/sqlite3/sqlite3.c'],
       'cflags': ['-std=c99', '-w'],
       'xcode_settings': {
         'OTHER_CFLAGS': ['-std=c99'],
@@ -75,33 +47,6 @@
           'defines': [
             'WIN32'
           ],
-          'link_settings': {
-            'libraries': [
-              '-llibcrypto.lib',
-              '-llibssl.lib',
-              '-lws2_32.lib',
-              '-lcrypt32.lib'
-            ],
-            'library_dirs': [
-              '<(SHARED_INTERMEDIATE_DIR)/sqlite3/>(openssl_root)'
-            ]
-          }
-        },
-        'OS == "mac"', {
-          'link_settings': {
-            'libraries': [
-              # This statically links libcrypto, whereas -lcrypto would dynamically link it
-              '<(SHARED_INTERMEDIATE_DIR)/sqlite3/OpenSSL-macOS/libcrypto.a'
-            ]
-          }
-        },
-        { # Linux
-          'link_settings': {
-            'libraries': [
-              # This statically links libcrypto, whereas -lcrypto would dynamically link it
-              '<(SHARED_INTERMEDIATE_DIR)/sqlite3/OpenSSL-Linux/libcrypto.a'
-            ]
-          }
         }],
       ],
       'configurations': {
