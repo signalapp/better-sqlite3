@@ -1,2 +1,6 @@
 *.lzz linguist-language=C++
+*.cpp -diff
+*.hpp -diff
+*.c -diff
+*.h -diff
 deps/sqlcipher.tar.gz filter=lfs diff=lfs merge=lfs -text

@@ -5,7 +5,7 @@ The fastest and simplest library for SQLite3 in Node.js.
 - Full transaction support
 - High performance, efficiency, and safety
 - Easy-to-use synchronous API *(better concurrency than an asynchronous API... yes, you read that correctly)*
-- Support for user-defined functions, aggregates, and extensions
+- Support for user-defined functions, aggregates, virtual tables, and extensions
 - 64-bit integers *(invisible until you need them)*
 - Worker thread support *(for large/slow queries)*
 
@@ -32,9 +32,7 @@ The fastest and simplest library for SQLite3 in Node.js.
 npm install better-sqlite3
 ```
 
-> You must be using Node.js v10.20.1 or above. Prebuilt binaries are available for [LTS versions](https://nodejs.org/en/about/releases/).
-
-> If you have trouble installing, check the [troubleshooting guide](./docs/troubleshooting.md).
+> You must be using Node.js v10.20.1 or above. Prebuilt binaries are available for [LTS versions](https://nodejs.org/en/about/releases/). If you have trouble installing, check the [troubleshooting guide](./docs/troubleshooting.md).
 
 ## Usage
 
@@ -43,6 +41,13 @@ const db = require('better-sqlite3')('foobar.db', options);
 
 const row = db.prepare('SELECT * FROM users WHERE id = ?').get(userId);
 console.log(row.firstName, row.lastName, row.email);
+```
+
+##### In ES6 module notation:
+
+```js
+import Database from 'better-sqlite3';
+const db = new Database('foobar.db', options);
 ```
 
 ## Why should I use this instead of [node-sqlite3](https://github.com/mapbox/node-sqlite3)?
