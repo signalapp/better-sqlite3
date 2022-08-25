@@ -24,6 +24,7 @@
     "cli-color": "^2.0.0",
     "fs-extra": "^10.0.0",
     "mocha": "^8.3.2",
+    "node-gyp": "^9.1.0",
     "nodemark": "^0.3.0",
     "sqlite": "^4.0.23",
     "sqlite3": "^5.0.2"
