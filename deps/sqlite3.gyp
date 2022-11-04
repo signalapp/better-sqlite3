@@ -89,9 +89,10 @@
         },
         'OS == "mac"', {
           'link_settings': {
-            'libraries': [
+            'ld_flags': [
+              '-L<(SHARED_INTERMEDIATE_DIR)/sqlite3/OpenSSL-mac-<(target_arch)',
               # This statically links libcrypto, whereas -lcrypto would dynamically link it
-              '<(SHARED_INTERMEDIATE_DIR)/sqlite3/OpenSSL-mac-<(target_arch)/libcrypto.a'
+              '-hidden-lcrypto'
             ]
           }
         },
