@@ -98,9 +98,9 @@
         },
         { # Linux
           'link_settings': {
-            'ld_flags': [
+            'libraries': [
               # This statically links libcrypto, whereas -lcrypto would dynamically link it
-              '--exclude-libs <(SHARED_INTERMEDIATE_DIR)/sqlite3/OpenSSL-linux-<(target_arch)/libcrypto.a'
+              '<(SHARED_INTERMEDIATE_DIR)/sqlite3/OpenSSL-linux-<(target_arch)/libcrypto.a'
             ]
           }
         }],
