@@ -16,7 +16,8 @@
     "src/*.[ch]pp",
     "lib/**",
     "deps/**",
-    "!deps/sqlcipher.tar.gz"
+    "!deps/sqlcipher.tar.gz",
+    "!deps/unverified.tmp"
   ],
   "dependencies": {
     "bindings": "^1.5.0",

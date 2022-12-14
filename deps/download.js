@@ -2,7 +2,6 @@ const https = require('https');
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
-const os = require('os');
 const { Transform } = require('stream');
 const { pipeline } = require('stream/promises');
 
@@ -13,9 +12,7 @@ const OPENSSL_VERSION = '3.0.7';
 const URL = `${BASE_URI}/sqlcipher-${SQLCIPHER_VERSION}--${OPENSSL_VERSION}-` +
   `${HASH}.tar.gz`;
 
-const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'better-sqlite3-'));
-
-const tmpFile = path.join(tmpDir, 'unverified.tmp');
+const tmpFile = path.join(__dirname, 'unverified.tmp');
 const finalFile = path.join(__dirname, 'sqlcipher.tar.gz');
 
 async function main() {
