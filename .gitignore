@@ -40,3 +40,6 @@ lib/binding
 temp/
 TODO
 .local
+
+# Downloaded artifact
+deps/sqlcipher.tar.gz
