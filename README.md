@@ -32,7 +32,7 @@ The fastest and simplest library for SQLite3 in Node.js.
 npm install better-sqlite3
 ```
 
-> You must be using Node.js v10.20.1 or above. Prebuilt binaries are available for [LTS versions](https://nodejs.org/en/about/releases/). If you have trouble installing, check the [troubleshooting guide](./docs/troubleshooting.md).
+> You must be using Node.js v14.21.1 or above. Prebuilt binaries are available for [LTS versions](https://nodejs.org/en/about/releases/). If you have trouble installing, check the [troubleshooting guide](./docs/troubleshooting.md).
 
 ## Usage
 
@@ -43,11 +43,18 @@ const row = db.prepare('SELECT * FROM users WHERE id = ?').get(userId);
 console.log(row.firstName, row.lastName, row.email);
 ```
 
+Though not required, [it is generally important to set the WAL pragma for performance reasons](https://github.com/WiseLibs/better-sqlite3/blob/master/docs/performance.md).
+
+```js
+db.pragma('journal_mode = WAL');
+```
+
 ##### In ES6 module notation:
 
 ```js
 import Database from 'better-sqlite3';
 const db = new Database('foobar.db', options);
+db.pragma('journal_mode = WAL');
 ```
 
 ## Why should I use this instead of [node-sqlite3](https://github.com/mapbox/node-sqlite3)?
@@ -76,7 +83,9 @@ For these situations, you should probably use a full-fledged RDBMS such as [Post
 - [64-bit integer support](./docs/integer.md)
 - [Worker thread support](./docs/threads.md)
 - [Unsafe mode (advanced)](./docs/unsafe.md)
-- [SQLite3 compilation](./docs/compilation.md)
+- [SQLite3 compilation (advanced)](./docs/compilation.md)
+- [Contribution rules](./docs/contribution.md)
+- [Code of conduct](./docs/conduct.md)
 
 # License
 
