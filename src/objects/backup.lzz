@@ -1,4 +1,4 @@
-class Backup : public ObjectWubbaDub {
+class Backup : public ObjectWrapForElectron22 {
 public:
 
 	INIT(Init) {
@@ -39,7 +39,7 @@ private:
 		sqlite3_uint64 id,
 		bool unlink
 	) :
-		ObjectWubbaDub(),
+		ObjectWrapForElectron22(),
 		db(db),
 		dest_handle(dest_handle),
 		backup_handle(backup_handle),

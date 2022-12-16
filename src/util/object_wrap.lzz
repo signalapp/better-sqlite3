@@ -19,14 +19,24 @@
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 // USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-class ObjectWubbaDub {
+// Original code taken from:
+// https://github.com/nodejs/node/blob/4166d40d0873b6d8a0c7291872c8d20dc680b1d7/src/node_object_wrap.h
+
+// The code for ObjectWrapForElectron22 is identical to node::ObjectWrap, except
+// it requires two internal fields on the object. First field is set to a
+// pointer to kNodeEmbedderId, and the second to the actual object pointer.
+// This fixes intermittent crashes on Electron 22-x-y.
+//
+// See: https://github.com/nodejs/node/pull/43521
+
+class ObjectWrapForElectron22 {
  public:
-  ObjectWubbaDub() {
+  ObjectWrapForElectron22() {
     refs_ = 0;
   }
 
 
-  virtual ~ObjectWubbaDub() {
+  virtual ~ObjectWrapForElectron22() {
     if (persistent().IsEmpty())
       return;
     persistent().ClearWeak();
@@ -38,10 +48,10 @@ class ObjectWubbaDub {
   static inline T* Unwrap(v8::Local<v8::Object> handle) {
     assert(!handle.IsEmpty());
     assert(handle->InternalFieldCount() > 1);
-    // Cast to ObjectWubbaDub before casting to T.  A direct cast from void
+    // Cast to ObjectWrapForElectron22 before casting to T.  A direct cast from void
     // to T won't work right when T has more than one base class.
     void* ptr = handle->GetAlignedPointerFromInternalField(1);
-    ObjectWubbaDub* wrap = static_cast<ObjectWubbaDub*>(ptr);
+    ObjectWrapForElectron22* wrap = static_cast<ObjectWrapForElectron22*>(ptr);
     return static_cast<T*>(wrap);
   }
 
@@ -108,8 +118,8 @@ class ObjectWubbaDub {
 
  private:
   static void WeakCallback(
-      const v8::WeakCallbackInfo<ObjectWubbaDub>& data) {
-    ObjectWubbaDub* wrap = data.GetParameter();
+      const v8::WeakCallbackInfo<ObjectWrapForElectron22>& data) {
+    ObjectWrapForElectron22* wrap = data.GetParameter();
     assert(wrap->refs_ == 0);
     wrap->handle_.Reset();
     delete wrap;

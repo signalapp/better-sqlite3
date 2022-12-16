@@ -12,7 +12,7 @@
 #include <node_buffer.h>
 #end
 
-#insert "util/object_wubba_dub.lzz"
+#insert "util/object_wrap.lzz"
 #insert "util/macros.lzz"
 #insert "util/query-macros.lzz"
 #insert "util/constants.lzz"

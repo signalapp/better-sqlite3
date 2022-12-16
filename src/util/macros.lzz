@@ -11,7 +11,7 @@
 #define UseIsolate v8::Isolate* isolate = OnlyIsolate
 #define UseContext v8::Local<v8::Context> ctx = OnlyContext
 #define UseAddon Addon* addon = OnlyAddon
-#define Unwrap ObjectWubbaDub::Unwrap
+#define Unwrap ObjectWrapForElectron22::Unwrap
 
 inline v8::Local<v8::String> StringFromUtf8(v8::Isolate* isolate, const char* data, int length) {
 	return v8::String::NewFromUtf8(isolate, data, v8::NewStringType::kNormal, length).ToLocalChecked();

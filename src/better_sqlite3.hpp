@@ -20,44 +20,44 @@ template <class T> using CopyablePersistent = v8::Persistent<T, v8::CopyablePers
 #line 36 "./src/util/binder.lzz"
 	static bool IsPlainObject(v8::Isolate* isolate, v8::Local<v8::Object> obj);
 #define LZZ_INLINE inline
-#line 1 "./src/util/object_wubba_dub.lzz"
-class ObjectWubbaDub
+#line 32 "./src/util/object_wrap.lzz"
+class ObjectWrapForElectron22
 {
-#line 2 "./src/util/object_wubba_dub.lzz"
+#line 33 "./src/util/object_wrap.lzz"
 public:
-#line 3 "./src/util/object_wubba_dub.lzz"
-  ObjectWubbaDub ();
-#line 8 "./src/util/object_wubba_dub.lzz"
-  virtual ~ ObjectWubbaDub ();
-#line 16 "./src/util/object_wubba_dub.lzz"
+#line 34 "./src/util/object_wrap.lzz"
+  ObjectWrapForElectron22 ();
+#line 39 "./src/util/object_wrap.lzz"
+  virtual ~ ObjectWrapForElectron22 ();
+#line 47 "./src/util/object_wrap.lzz"
   template <typename T>
-#line 17 "./src/util/object_wubba_dub.lzz"
+#line 48 "./src/util/object_wrap.lzz"
   static T * Unwrap (v8::Local <v8::Object> handle);
-#line 28 "./src/util/object_wubba_dub.lzz"
+#line 59 "./src/util/object_wrap.lzz"
   v8::Local <v8::Object> handle ();
-#line 33 "./src/util/object_wubba_dub.lzz"
+#line 64 "./src/util/object_wrap.lzz"
   v8::Local <v8::Object> handle (v8::Isolate * isolate);
-#line 39 "./src/util/object_wubba_dub.lzz"
+#line 70 "./src/util/object_wrap.lzz"
   v8::Persistent <v8::Object> & persistent ();
-#line 44 "./src/util/object_wubba_dub.lzz"
+#line 75 "./src/util/object_wrap.lzz"
 protected:
-#line 45 "./src/util/object_wubba_dub.lzz"
+#line 76 "./src/util/object_wrap.lzz"
   void Wrap (v8::Local <v8::Object> handle);
-#line 55 "./src/util/object_wubba_dub.lzz"
+#line 86 "./src/util/object_wrap.lzz"
   void MakeWeak ();
-#line 63 "./src/util/object_wubba_dub.lzz"
+#line 94 "./src/util/object_wrap.lzz"
   virtual void Ref ();
-#line 78 "./src/util/object_wubba_dub.lzz"
+#line 109 "./src/util/object_wrap.lzz"
   virtual void Unref ();
-#line 86 "./src/util/object_wubba_dub.lzz"
+#line 117 "./src/util/object_wrap.lzz"
   int refs_;
-#line 88 "./src/util/object_wubba_dub.lzz"
+#line 119 "./src/util/object_wrap.lzz"
 private:
-#line 89 "./src/util/object_wubba_dub.lzz"
-  static void WeakCallback (v8::WeakCallbackInfo <ObjectWubbaDub> const & data);
-#line 98 "./src/util/object_wubba_dub.lzz"
+#line 120 "./src/util/object_wrap.lzz"
+  static void WeakCallback (v8::WeakCallbackInfo <ObjectWrapForElectron22> const & data);
+#line 129 "./src/util/object_wrap.lzz"
   v8::Persistent <v8::Object> handle_;
-#line 100 "./src/util/object_wubba_dub.lzz"
+#line 131 "./src/util/object_wrap.lzz"
   static uint16_t kNodeEmbedderId;
 };
 #line 16 "./src/util/macros.lzz"
@@ -203,7 +203,7 @@ class Statement;
 #line 22 "./src/better_sqlite3.lzz"
 class Backup;
 #line 1 "./src/objects/database.lzz"
-class Database : public ObjectWubbaDub
+class Database : public ObjectWrapForElectron22
 {
 #line 2 "./src/objects/database.lzz"
 public:
@@ -345,7 +345,7 @@ private:
   std::set <Backup*, CompareBackup> backups;
 };
 #line 1 "./src/objects/statement.lzz"
-class Statement : public ObjectWubbaDub
+class Statement : public ObjectWrapForElectron22
 {
 #line 1 "./src/objects/statement.lzz"
   friend class StatementIterator;
@@ -423,7 +423,7 @@ private:
   bool const returns_data;
 };
 #line 1 "./src/objects/statement-iterator.lzz"
-class StatementIterator : public ObjectWubbaDub
+class StatementIterator : public ObjectWrapForElectron22
 {
 #line 2 "./src/objects/statement-iterator.lzz"
 public:
@@ -473,7 +473,7 @@ private:
   bool logged;
 };
 #line 1 "./src/objects/backup.lzz"
-class Backup : public ObjectWubbaDub
+class Backup : public ObjectWrapForElectron22
 {
 #line 2 "./src/objects/backup.lzz"
 public:
@@ -842,41 +842,41 @@ struct Addon
 #line 63 "./src/better_sqlite3.lzz"
   std::set <Database*, Database::CompareDatabase> dbs;
 };
-#line 16 "./src/util/object_wubba_dub.lzz"
+#line 47 "./src/util/object_wrap.lzz"
 template <typename T>
-#line 17 "./src/util/object_wubba_dub.lzz"
-LZZ_INLINE T * ObjectWubbaDub::Unwrap (v8::Local <v8::Object> handle)
-#line 17 "./src/util/object_wubba_dub.lzz"
+#line 48 "./src/util/object_wrap.lzz"
+LZZ_INLINE T * ObjectWrapForElectron22::Unwrap (v8::Local <v8::Object> handle)
+#line 48 "./src/util/object_wrap.lzz"
                                                         {
     assert(!handle.IsEmpty());
     assert(handle->InternalFieldCount() > 1);
 
 
     void* ptr = handle->GetAlignedPointerFromInternalField(1);
-    ObjectWubbaDub* wrap = static_cast<ObjectWubbaDub*>(ptr);
+    ObjectWrapForElectron22* wrap = static_cast<ObjectWrapForElectron22*>(ptr);
     return static_cast<T*>(wrap);
 }
-#line 28 "./src/util/object_wubba_dub.lzz"
-LZZ_INLINE v8::Local <v8::Object> ObjectWubbaDub::handle ()
-#line 28 "./src/util/object_wubba_dub.lzz"
+#line 59 "./src/util/object_wrap.lzz"
+LZZ_INLINE v8::Local <v8::Object> ObjectWrapForElectron22::handle ()
+#line 59 "./src/util/object_wrap.lzz"
                                         {
     return handle(v8::Isolate::GetCurrent());
 }
-#line 33 "./src/util/object_wubba_dub.lzz"
-LZZ_INLINE v8::Local <v8::Object> ObjectWubbaDub::handle (v8::Isolate * isolate)
-#line 33 "./src/util/object_wubba_dub.lzz"
+#line 64 "./src/util/object_wrap.lzz"
+LZZ_INLINE v8::Local <v8::Object> ObjectWrapForElectron22::handle (v8::Isolate * isolate)
+#line 64 "./src/util/object_wrap.lzz"
                                                             {
     return v8::Local<v8::Object>::New(isolate, persistent());
 }
-#line 39 "./src/util/object_wubba_dub.lzz"
-LZZ_INLINE v8::Persistent <v8::Object> & ObjectWubbaDub::persistent ()
-#line 39 "./src/util/object_wubba_dub.lzz"
+#line 70 "./src/util/object_wrap.lzz"
+LZZ_INLINE v8::Persistent <v8::Object> & ObjectWrapForElectron22::persistent ()
+#line 70 "./src/util/object_wrap.lzz"
                                                   {
     return handle_;
 }
-#line 45 "./src/util/object_wubba_dub.lzz"
-LZZ_INLINE void ObjectWubbaDub::Wrap (v8::Local <v8::Object> handle)
-#line 45 "./src/util/object_wubba_dub.lzz"
+#line 76 "./src/util/object_wrap.lzz"
+LZZ_INLINE void ObjectWrapForElectron22::Wrap (v8::Local <v8::Object> handle)
+#line 76 "./src/util/object_wrap.lzz"
                                                  {
     assert(persistent().IsEmpty());
     assert(handle->InternalFieldCount() > 1);
@@ -885,9 +885,9 @@ LZZ_INLINE void ObjectWubbaDub::Wrap (v8::Local <v8::Object> handle)
     persistent().Reset(v8::Isolate::GetCurrent(), handle);
     MakeWeak();
 }
-#line 55 "./src/util/object_wubba_dub.lzz"
-LZZ_INLINE void ObjectWubbaDub::MakeWeak ()
-#line 55 "./src/util/object_wubba_dub.lzz"
+#line 86 "./src/util/object_wrap.lzz"
+LZZ_INLINE void ObjectWrapForElectron22::MakeWeak ()
+#line 86 "./src/util/object_wrap.lzz"
                          {
     persistent().SetWeak(this, WeakCallback, v8::WeakCallbackType::kParameter);
 }
