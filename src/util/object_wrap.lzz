@@ -1,0 +1,138 @@
+// Copyright Joyent, Inc. and other Node contributors.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a
+// copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to permit
+// persons to whom the Software is furnished to do so, subject to the
+// following conditions:
+//
+// The above copyright notice and this permission notice shall be included
+// in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+// USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+// Original code taken from:
+// https://github.com/nodejs/node/blob/4166d40d0873b6d8a0c7291872c8d20dc680b1d7/src/node_object_wrap.h
+
+// The code for ObjectWrapForElectron22 is identical to node::ObjectWrap, except
+// it requires two internal fields on the object. First field is set to a
+// pointer to kNodeEmbedderId, and the second to the actual object pointer.
+// This fixes intermittent crashes on Electron 22-x-y.
+//
+// See: https://github.com/nodejs/node/pull/43521
+
+class ObjectWrapForElectron22 {
+ public:
+  ObjectWrapForElectron22() {
+    refs_ = 0;
+  }
+
+
+  virtual ~ObjectWrapForElectron22() {
+    if (persistent().IsEmpty())
+      return;
+    persistent().ClearWeak();
+    persistent().Reset();
+  }
+
+
+  template <class T>
+  static inline T* Unwrap(v8::Local<v8::Object> handle) {
+    assert(!handle.IsEmpty());
+    assert(handle->InternalFieldCount() > 1);
+    // Cast to ObjectWrapForElectron22 before casting to T.  A direct cast from void
+    // to T won't work right when T has more than one base class.
+    // SIGNAL CHANGES BEGIN
+    void* ptr = handle->GetAlignedPointerFromInternalField(1);
+    // SIGNAL CHANGES END
+    ObjectWrapForElectron22* wrap = static_cast<ObjectWrapForElectron22*>(ptr);
+    return static_cast<T*>(wrap);
+  }
+
+
+  inline v8::Local<v8::Object> handle() {
+    return handle(v8::Isolate::GetCurrent());
+  }
+
+
+  inline v8::Local<v8::Object> handle(v8::Isolate* isolate) {
+    return v8::Local<v8::Object>::New(isolate, persistent());
+  }
+
+
+  // NOLINTNEXTLINE(runtime/v8_persistent)
+  inline v8::Persistent<v8::Object>& persistent() {
+    return handle_;
+  }
+
+
+ protected:
+  inline void Wrap(v8::Local<v8::Object> handle) {
+    assert(persistent().IsEmpty());
+    assert(handle->InternalFieldCount() > 1);
+    // SIGNAL CHANGES BEGIN
+    handle->SetAlignedPointerInInternalField(0, &kNodeEmbedderId);
+    handle->SetAlignedPointerInInternalField(1, this);
+    // SIGNAL CHANGES END
+    persistent().Reset(v8::Isolate::GetCurrent(), handle);
+    MakeWeak();
+  }
+
+
+  inline void MakeWeak() {
+    persistent().SetWeak(this, WeakCallback, v8::WeakCallbackType::kParameter);
+  }
+
+  /* Ref() marks the object as being attached to an event loop.
+   * Refed objects will not be garbage collected, even if
+   * all references are lost.
+   */
+  virtual void Ref() {
+    assert(!persistent().IsEmpty());
+    persistent().ClearWeak();
+    refs_++;
+  }
+
+  /* Unref() marks an object as detached from the event loop.  This is its
+   * default state.  When an object with a "weak" reference changes from
+   * attached to detached state it will be freed. Be careful not to access
+   * the object after making this call as it might be gone!
+   * (A "weak reference" means an object that only has a
+   * persistent handle.)
+   *
+   * DO NOT CALL THIS FROM DESTRUCTOR
+   */
+  virtual void Unref() {
+    assert(!persistent().IsEmpty());
+    assert(!persistent().IsWeak());
+    assert(refs_ > 0);
+    if (--refs_ == 0)
+      MakeWeak();
+  }
+
+  int refs_;  // ro
+
+ private:
+  static void WeakCallback(
+      const v8::WeakCallbackInfo<ObjectWrapForElectron22>& data) {
+    ObjectWrapForElectron22* wrap = data.GetParameter();
+    assert(wrap->refs_ == 0);
+    wrap->handle_.Reset();
+    delete wrap;
+  }
+
+  // NOLINTNEXTLINE(runtime/v8_persistent)
+  v8::Persistent<v8::Object> handle_;
+
+  // SIGNAL CHANGES BEGIN
+  static uint16_t kNodeEmbedderId = 0x90de;
+  // SIGNAL CHANGES END
+};

@@ -1,4 +1,4 @@
-class Statement : public node::ObjectWrap { friend class StatementIterator;
+class Statement : public ObjectWrapForElectron22 { friend class StatementIterator;
 public:
 
 	INIT(Init) {
@@ -64,7 +64,7 @@ private:
 		sqlite3_uint64 id,
 		bool returns_data
 	) :
-		node::ObjectWrap(),
+		ObjectWrapForElectron22(),
 		db(db),
 		handle(handle),
 		extras(new Extras(id)),

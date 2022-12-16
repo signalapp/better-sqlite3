@@ -9,10 +9,10 @@
 #include <algorithm>
 #include <sqlite3.h>
 #include <node.h>
-#include <node_object_wrap.h>
 #include <node_buffer.h>
 #end
 
+#insert "util/object_wrap.lzz"
 #insert "util/macros.lzz"
 #insert "util/query-macros.lzz"
 #insert "util/constants.lzz"
