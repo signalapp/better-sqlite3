@@ -33,31 +33,31 @@ public:
   template <typename T>
 #line 48 "./src/util/object_wrap.lzz"
   static T * Unwrap (v8::Local <v8::Object> handle);
-#line 59 "./src/util/object_wrap.lzz"
+#line 61 "./src/util/object_wrap.lzz"
   v8::Local <v8::Object> handle ();
-#line 64 "./src/util/object_wrap.lzz"
+#line 66 "./src/util/object_wrap.lzz"
   v8::Local <v8::Object> handle (v8::Isolate * isolate);
-#line 70 "./src/util/object_wrap.lzz"
+#line 72 "./src/util/object_wrap.lzz"
   v8::Persistent <v8::Object> & persistent ();
-#line 75 "./src/util/object_wrap.lzz"
+#line 77 "./src/util/object_wrap.lzz"
 protected:
-#line 76 "./src/util/object_wrap.lzz"
+#line 78 "./src/util/object_wrap.lzz"
   void Wrap (v8::Local <v8::Object> handle);
-#line 86 "./src/util/object_wrap.lzz"
+#line 90 "./src/util/object_wrap.lzz"
   void MakeWeak ();
-#line 94 "./src/util/object_wrap.lzz"
+#line 98 "./src/util/object_wrap.lzz"
   virtual void Ref ();
-#line 109 "./src/util/object_wrap.lzz"
+#line 113 "./src/util/object_wrap.lzz"
   virtual void Unref ();
-#line 117 "./src/util/object_wrap.lzz"
+#line 121 "./src/util/object_wrap.lzz"
   int refs_;
-#line 119 "./src/util/object_wrap.lzz"
+#line 123 "./src/util/object_wrap.lzz"
 private:
-#line 120 "./src/util/object_wrap.lzz"
+#line 124 "./src/util/object_wrap.lzz"
   static void WeakCallback (v8::WeakCallbackInfo <ObjectWrapForElectron22> const & data);
-#line 129 "./src/util/object_wrap.lzz"
+#line 133 "./src/util/object_wrap.lzz"
   v8::Persistent <v8::Object> handle_;
-#line 131 "./src/util/object_wrap.lzz"
+#line 136 "./src/util/object_wrap.lzz"
   static uint16_t kNodeEmbedderId;
 };
 #line 16 "./src/util/macros.lzz"
@@ -88,11 +88,11 @@ template <typename T>
 void FREE_ARRAY (T * array_pointer);
 #line 105 "./src/util/macros.lzz"
 v8::Local <v8::FunctionTemplate> NewConstructorTemplate (v8::Isolate * isolate, v8::Local <v8::External> data, v8::FunctionCallback func, char const * name);
-#line 116 "./src/util/macros.lzz"
+#line 118 "./src/util/macros.lzz"
 void SetPrototypeMethod (v8::Isolate * isolate, v8::Local <v8::External> data, v8::Local <v8::FunctionTemplate> recv, char const * name, v8::FunctionCallback func);
-#line 129 "./src/util/macros.lzz"
+#line 131 "./src/util/macros.lzz"
 void SetPrototypeSymbolMethod (v8::Isolate * isolate, v8::Local <v8::External> data, v8::Local <v8::FunctionTemplate> recv, v8::Local <v8::Symbol> symbol, v8::FunctionCallback func);
-#line 142 "./src/util/macros.lzz"
+#line 144 "./src/util/macros.lzz"
 void SetPrototypeGetter (v8::Isolate * isolate, v8::Local <v8::External> data, v8::Local <v8::FunctionTemplate> recv, char const * name, v8::AccessorGetterCallback func);
 #line 1 "./src/util/constants.lzz"
 class CS
@@ -852,42 +852,46 @@ LZZ_INLINE T * ObjectWrapForElectron22::Unwrap (v8::Local <v8::Object> handle)
     assert(handle->InternalFieldCount() > 1);
 
 
+
     void* ptr = handle->GetAlignedPointerFromInternalField(1);
+
     ObjectWrapForElectron22* wrap = static_cast<ObjectWrapForElectron22*>(ptr);
     return static_cast<T*>(wrap);
 }
-#line 59 "./src/util/object_wrap.lzz"
+#line 61 "./src/util/object_wrap.lzz"
 LZZ_INLINE v8::Local <v8::Object> ObjectWrapForElectron22::handle ()
-#line 59 "./src/util/object_wrap.lzz"
+#line 61 "./src/util/object_wrap.lzz"
                                         {
     return handle(v8::Isolate::GetCurrent());
 }
-#line 64 "./src/util/object_wrap.lzz"
+#line 66 "./src/util/object_wrap.lzz"
 LZZ_INLINE v8::Local <v8::Object> ObjectWrapForElectron22::handle (v8::Isolate * isolate)
-#line 64 "./src/util/object_wrap.lzz"
+#line 66 "./src/util/object_wrap.lzz"
                                                             {
     return v8::Local<v8::Object>::New(isolate, persistent());
 }
-#line 70 "./src/util/object_wrap.lzz"
+#line 72 "./src/util/object_wrap.lzz"
 LZZ_INLINE v8::Persistent <v8::Object> & ObjectWrapForElectron22::persistent ()
-#line 70 "./src/util/object_wrap.lzz"
+#line 72 "./src/util/object_wrap.lzz"
                                                   {
     return handle_;
 }
-#line 76 "./src/util/object_wrap.lzz"
+#line 78 "./src/util/object_wrap.lzz"
 LZZ_INLINE void ObjectWrapForElectron22::Wrap (v8::Local <v8::Object> handle)
-#line 76 "./src/util/object_wrap.lzz"
+#line 78 "./src/util/object_wrap.lzz"
                                                  {
     assert(persistent().IsEmpty());
     assert(handle->InternalFieldCount() > 1);
+
     handle->SetAlignedPointerInInternalField(0, &kNodeEmbedderId);
     handle->SetAlignedPointerInInternalField(1, this);
+
     persistent().Reset(v8::Isolate::GetCurrent(), handle);
     MakeWeak();
 }
-#line 86 "./src/util/object_wrap.lzz"
+#line 90 "./src/util/object_wrap.lzz"
 LZZ_INLINE void ObjectWrapForElectron22::MakeWeak ()
-#line 86 "./src/util/object_wrap.lzz"
+#line 90 "./src/util/object_wrap.lzz"
                          {
     persistent().SetWeak(this, WeakCallback, v8::WeakCallbackType::kParameter);
 }

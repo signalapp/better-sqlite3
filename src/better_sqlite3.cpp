@@ -79,17 +79,17 @@ ObjectWrapForElectron22::~ ObjectWrapForElectron22 ()
     persistent().ClearWeak();
     persistent().Reset();
 }
-#line 94 "./src/util/object_wrap.lzz"
+#line 98 "./src/util/object_wrap.lzz"
 void ObjectWrapForElectron22::Ref ()
-#line 94 "./src/util/object_wrap.lzz"
+#line 98 "./src/util/object_wrap.lzz"
                      {
     assert(!persistent().IsEmpty());
     persistent().ClearWeak();
     refs_++;
 }
-#line 109 "./src/util/object_wrap.lzz"
+#line 113 "./src/util/object_wrap.lzz"
 void ObjectWrapForElectron22::Unref ()
-#line 109 "./src/util/object_wrap.lzz"
+#line 113 "./src/util/object_wrap.lzz"
                        {
     assert(!persistent().IsEmpty());
     assert(!persistent().IsWeak());
@@ -97,16 +97,16 @@ void ObjectWrapForElectron22::Unref ()
     if (--refs_ == 0)
       MakeWeak();
 }
-#line 120 "./src/util/object_wrap.lzz"
+#line 124 "./src/util/object_wrap.lzz"
 void ObjectWrapForElectron22::WeakCallback (v8::WeakCallbackInfo <ObjectWrapForElectron22> const & data)
-#line 121 "./src/util/object_wrap.lzz"
+#line 125 "./src/util/object_wrap.lzz"
                                                                  {
     ObjectWrapForElectron22* wrap = data.GetParameter();
     assert(wrap->refs_ == 0);
     wrap->handle_.Reset();
     delete wrap;
 }
-#line 131 "./src/util/object_wrap.lzz"
+#line 136 "./src/util/object_wrap.lzz"
 uint16_t ObjectWrapForElectron22::kNodeEmbedderId = 0x90de;
 #line 37 "./src/util/macros.lzz"
 void ThrowError (char const * message)
@@ -128,13 +128,15 @@ v8::Local <v8::FunctionTemplate> NewConstructorTemplate (v8::Isolate * isolate, 
 #line 110 "./src/util/macros.lzz"
   {
         v8::Local<v8::FunctionTemplate> t = v8::FunctionTemplate::New(isolate, func, data);
+
         t->InstanceTemplate()->SetInternalFieldCount(2);
+
         t->SetClassName(InternalizedFromLatin1(isolate, name));
         return t;
 }
-#line 116 "./src/util/macros.lzz"
+#line 118 "./src/util/macros.lzz"
 void SetPrototypeMethod (v8::Isolate * isolate, v8::Local <v8::External> data, v8::Local <v8::FunctionTemplate> recv, char const * name, v8::FunctionCallback func)
-#line 122 "./src/util/macros.lzz"
+#line 124 "./src/util/macros.lzz"
   {
         v8::HandleScope scope(isolate);
         recv->PrototypeTemplate()->Set(
@@ -142,9 +144,9 @@ void SetPrototypeMethod (v8::Isolate * isolate, v8::Local <v8::External> data, v
                 v8::FunctionTemplate::New(isolate, func, data, v8::Signature::New(isolate, recv))
         );
 }
-#line 129 "./src/util/macros.lzz"
+#line 131 "./src/util/macros.lzz"
 void SetPrototypeSymbolMethod (v8::Isolate * isolate, v8::Local <v8::External> data, v8::Local <v8::FunctionTemplate> recv, v8::Local <v8::Symbol> symbol, v8::FunctionCallback func)
-#line 135 "./src/util/macros.lzz"
+#line 137 "./src/util/macros.lzz"
   {
         v8::HandleScope scope(isolate);
         recv->PrototypeTemplate()->Set(
@@ -152,9 +154,9 @@ void SetPrototypeSymbolMethod (v8::Isolate * isolate, v8::Local <v8::External> d
                 v8::FunctionTemplate::New(isolate, func, data, v8::Signature::New(isolate, recv))
         );
 }
-#line 142 "./src/util/macros.lzz"
+#line 144 "./src/util/macros.lzz"
 void SetPrototypeGetter (v8::Isolate * isolate, v8::Local <v8::External> data, v8::Local <v8::FunctionTemplate> recv, char const * name, v8::AccessorGetterCallback func)
-#line 148 "./src/util/macros.lzz"
+#line 150 "./src/util/macros.lzz"
   {
         v8::HandleScope scope(isolate);
         recv->InstanceTemplate()->SetAccessor(
