@@ -50,7 +50,9 @@ class ObjectWrapForElectron22 {
     assert(handle->InternalFieldCount() > 1);
     // Cast to ObjectWrapForElectron22 before casting to T.  A direct cast from void
     // to T won't work right when T has more than one base class.
+    // SIGNAL CHANGES BEGIN
     void* ptr = handle->GetAlignedPointerFromInternalField(1);
+    // SIGNAL CHANGES END
     ObjectWrapForElectron22* wrap = static_cast<ObjectWrapForElectron22*>(ptr);
     return static_cast<T*>(wrap);
   }
@@ -76,8 +78,10 @@ class ObjectWrapForElectron22 {
   inline void Wrap(v8::Local<v8::Object> handle) {
     assert(persistent().IsEmpty());
     assert(handle->InternalFieldCount() > 1);
+    // SIGNAL CHANGES BEGIN
     handle->SetAlignedPointerInInternalField(0, &kNodeEmbedderId);
     handle->SetAlignedPointerInInternalField(1, this);
+    // SIGNAL CHANGES END
     persistent().Reset(v8::Isolate::GetCurrent(), handle);
     MakeWeak();
   }
@@ -128,5 +132,7 @@ class ObjectWrapForElectron22 {
   // NOLINTNEXTLINE(runtime/v8_persistent)
   v8::Persistent<v8::Object> handle_;
 
+  // SIGNAL CHANGES BEGIN
   static uint16_t kNodeEmbedderId = 0x90de;
+  // SIGNAL CHANGES END
 };
