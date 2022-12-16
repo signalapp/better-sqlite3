@@ -14,13 +14,52 @@
 #include <algorithm>
 #include <sqlite3.h>
 #include <node.h>
-#include <node_object_wrap.h>
 #include <node_buffer.h>
 #line 31 "./src/util/macros.lzz"
 template <class T> using CopyablePersistent = v8::Persistent<T, v8::CopyablePersistentTraits<T>>;
 #line 36 "./src/util/binder.lzz"
 	static bool IsPlainObject(v8::Isolate* isolate, v8::Local<v8::Object> obj);
 #define LZZ_INLINE inline
+#line 1 "./src/util/object_wubba_dub.lzz"
+class ObjectWubbaDub
+{
+#line 2 "./src/util/object_wubba_dub.lzz"
+public:
+#line 3 "./src/util/object_wubba_dub.lzz"
+  ObjectWubbaDub ();
+#line 8 "./src/util/object_wubba_dub.lzz"
+  virtual ~ ObjectWubbaDub ();
+#line 16 "./src/util/object_wubba_dub.lzz"
+  template <typename T>
+#line 17 "./src/util/object_wubba_dub.lzz"
+  static T * Unwrap (v8::Local <v8::Object> handle);
+#line 28 "./src/util/object_wubba_dub.lzz"
+  v8::Local <v8::Object> handle ();
+#line 33 "./src/util/object_wubba_dub.lzz"
+  v8::Local <v8::Object> handle (v8::Isolate * isolate);
+#line 39 "./src/util/object_wubba_dub.lzz"
+  v8::Persistent <v8::Object> & persistent ();
+#line 44 "./src/util/object_wubba_dub.lzz"
+protected:
+#line 45 "./src/util/object_wubba_dub.lzz"
+  void Wrap (v8::Local <v8::Object> handle);
+#line 55 "./src/util/object_wubba_dub.lzz"
+  void MakeWeak ();
+#line 63 "./src/util/object_wubba_dub.lzz"
+  virtual void Ref ();
+#line 78 "./src/util/object_wubba_dub.lzz"
+  virtual void Unref ();
+#line 86 "./src/util/object_wubba_dub.lzz"
+  int refs_;
+#line 88 "./src/util/object_wubba_dub.lzz"
+private:
+#line 89 "./src/util/object_wubba_dub.lzz"
+  static void WeakCallback (v8::WeakCallbackInfo <ObjectWubbaDub> const & data);
+#line 98 "./src/util/object_wubba_dub.lzz"
+  v8::Persistent <v8::Object> handle_;
+#line 100 "./src/util/object_wubba_dub.lzz"
+  static uint16_t kNodeEmbedderId;
+};
 #line 16 "./src/util/macros.lzz"
 v8::Local <v8::String> StringFromUtf8 (v8::Isolate * isolate, char const * data, int length);
 #line 19 "./src/util/macros.lzz"
@@ -164,7 +203,7 @@ class Statement;
 #line 22 "./src/better_sqlite3.lzz"
 class Backup;
 #line 1 "./src/objects/database.lzz"
-class Database : public node::ObjectWrap
+class Database : public ObjectWubbaDub
 {
 #line 2 "./src/objects/database.lzz"
 public:
@@ -306,7 +345,7 @@ private:
   std::set <Backup*, CompareBackup> backups;
 };
 #line 1 "./src/objects/statement.lzz"
-class Statement : public node::ObjectWrap
+class Statement : public ObjectWubbaDub
 {
 #line 1 "./src/objects/statement.lzz"
   friend class StatementIterator;
@@ -384,7 +423,7 @@ private:
   bool const returns_data;
 };
 #line 1 "./src/objects/statement-iterator.lzz"
-class StatementIterator : public node::ObjectWrap
+class StatementIterator : public ObjectWubbaDub
 {
 #line 2 "./src/objects/statement-iterator.lzz"
 public:
@@ -434,7 +473,7 @@ private:
   bool logged;
 };
 #line 1 "./src/objects/backup.lzz"
-class Backup : public node::ObjectWrap
+class Backup : public ObjectWubbaDub
 {
 #line 2 "./src/objects/backup.lzz"
 public:
@@ -803,6 +842,55 @@ struct Addon
 #line 63 "./src/better_sqlite3.lzz"
   std::set <Database*, Database::CompareDatabase> dbs;
 };
+#line 16 "./src/util/object_wubba_dub.lzz"
+template <typename T>
+#line 17 "./src/util/object_wubba_dub.lzz"
+LZZ_INLINE T * ObjectWubbaDub::Unwrap (v8::Local <v8::Object> handle)
+#line 17 "./src/util/object_wubba_dub.lzz"
+                                                        {
+    assert(!handle.IsEmpty());
+    assert(handle->InternalFieldCount() > 1);
+
+
+    void* ptr = handle->GetAlignedPointerFromInternalField(1);
+    ObjectWubbaDub* wrap = static_cast<ObjectWubbaDub*>(ptr);
+    return static_cast<T*>(wrap);
+}
+#line 28 "./src/util/object_wubba_dub.lzz"
+LZZ_INLINE v8::Local <v8::Object> ObjectWubbaDub::handle ()
+#line 28 "./src/util/object_wubba_dub.lzz"
+                                        {
+    return handle(v8::Isolate::GetCurrent());
+}
+#line 33 "./src/util/object_wubba_dub.lzz"
+LZZ_INLINE v8::Local <v8::Object> ObjectWubbaDub::handle (v8::Isolate * isolate)
+#line 33 "./src/util/object_wubba_dub.lzz"
+                                                            {
+    return v8::Local<v8::Object>::New(isolate, persistent());
+}
+#line 39 "./src/util/object_wubba_dub.lzz"
+LZZ_INLINE v8::Persistent <v8::Object> & ObjectWubbaDub::persistent ()
+#line 39 "./src/util/object_wubba_dub.lzz"
+                                                  {
+    return handle_;
+}
+#line 45 "./src/util/object_wubba_dub.lzz"
+LZZ_INLINE void ObjectWubbaDub::Wrap (v8::Local <v8::Object> handle)
+#line 45 "./src/util/object_wubba_dub.lzz"
+                                                 {
+    assert(persistent().IsEmpty());
+    assert(handle->InternalFieldCount() > 1);
+    handle->SetAlignedPointerInInternalField(0, &kNodeEmbedderId);
+    handle->SetAlignedPointerInInternalField(1, this);
+    persistent().Reset(v8::Isolate::GetCurrent(), handle);
+    MakeWeak();
+}
+#line 55 "./src/util/object_wubba_dub.lzz"
+LZZ_INLINE void ObjectWubbaDub::MakeWeak ()
+#line 55 "./src/util/object_wubba_dub.lzz"
+                         {
+    persistent().SetWeak(this, WeakCallback, v8::WeakCallbackType::kParameter);
+}
 #line 16 "./src/util/macros.lzz"
 LZZ_INLINE v8::Local <v8::String> StringFromUtf8 (v8::Isolate * isolate, char const * data, int length)
 #line 16 "./src/util/macros.lzz"

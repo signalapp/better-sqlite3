@@ -1,4 +1,4 @@
-class StatementIterator : public node::ObjectWrap {
+class StatementIterator : public ObjectWubbaDub {
 public:
 
 	INIT(Init) {
@@ -16,7 +16,7 @@ public:
 
 private:
 
-	explicit StatementIterator(Statement* stmt, bool bound) : node::ObjectWrap(),
+	explicit StatementIterator(Statement* stmt, bool bound) : ObjectWubbaDub(),
 		stmt(stmt),
 		handle(stmt->handle),
 		db_state(stmt->db->GetState()),

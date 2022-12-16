@@ -1,4 +1,4 @@
-class Database : public node::ObjectWrap {
+class Database : public ObjectWubbaDub {
 public:
 
 	INIT(Init) {
@@ -129,7 +129,7 @@ private:
 		sqlite3* db_handle,
 		v8::Local<v8::Value> logger
 	) :
-		node::ObjectWrap(),
+		ObjectWubbaDub(),
 		db_handle(db_handle),
 		open(true),
 		busy(false),
