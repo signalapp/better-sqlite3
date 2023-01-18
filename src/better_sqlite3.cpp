@@ -17,7 +17,7 @@
 		ctx->Exit();
 		return proto->StrictEquals(baseProto) || proto->StrictEquals(v8::Null(isolate));
 	}
-#line 102 "./src/better_sqlite3.lzz"
+#line 103 "./src/better_sqlite3.lzz"
 NODE_MODULE_INIT(/* exports, context */) {
 	v8::Isolate* isolate = context->GetIsolate();
 	v8::HandleScope scope(isolate);
@@ -2203,18 +2203,19 @@ void Addon::InitLoggerOnce ()
                 if (err != 0) {
                         abort();
                 }
+                sqlite3_initialize();
                 sqlite3_config(SQLITE_CONFIG_LOG, Addon::SqliteLog, nullptr);
 }
-#line 76 "./src/better_sqlite3.lzz"
+#line 77 "./src/better_sqlite3.lzz"
 Addon::Addon (v8::Isolate * isolate)
-#line 76 "./src/better_sqlite3.lzz"
+#line 77 "./src/better_sqlite3.lzz"
   : privileged_info (NULL), next_id (0), cs (isolate)
-#line 79 "./src/better_sqlite3.lzz"
+#line 80 "./src/better_sqlite3.lzz"
                             {
                 static uv_once_t init_once = UV_ONCE_INIT;
                 uv_once(&init_once, InitLoggerOnce);
                 uv_key_set(&thread_key, this);
 }
-#line 98 "./src/better_sqlite3.lzz"
+#line 99 "./src/better_sqlite3.lzz"
 uv_key_t Addon::thread_key;
 #undef LZZ_INLINE

@@ -828,29 +828,29 @@ struct Addon
   static void SqliteLog (void * pArg, int iErrCode, char const * zMsg);
 #line 68 "./src/better_sqlite3.lzz"
   static void InitLoggerOnce ();
-#line 76 "./src/better_sqlite3.lzz"
+#line 77 "./src/better_sqlite3.lzz"
   explicit Addon (v8::Isolate * isolate);
-#line 85 "./src/better_sqlite3.lzz"
+#line 86 "./src/better_sqlite3.lzz"
   sqlite3_uint64 NextId ();
-#line 89 "./src/better_sqlite3.lzz"
-  CopyablePersistent <v8::Function> Statement;
 #line 90 "./src/better_sqlite3.lzz"
-  CopyablePersistent <v8::Function> StatementIterator;
+  CopyablePersistent <v8::Function> Statement;
 #line 91 "./src/better_sqlite3.lzz"
-  CopyablePersistent <v8::Function> Backup;
+  CopyablePersistent <v8::Function> StatementIterator;
 #line 92 "./src/better_sqlite3.lzz"
-  CopyablePersistent <v8::Function> SqliteError;
+  CopyablePersistent <v8::Function> Backup;
 #line 93 "./src/better_sqlite3.lzz"
-  CopyablePersistent <v8::Function> LogHandler;
+  CopyablePersistent <v8::Function> SqliteError;
 #line 94 "./src/better_sqlite3.lzz"
-  v8::FunctionCallbackInfo <v8 :: Value> const * privileged_info;
+  CopyablePersistent <v8::Function> LogHandler;
 #line 95 "./src/better_sqlite3.lzz"
-  sqlite3_uint64 next_id;
+  v8::FunctionCallbackInfo <v8 :: Value> const * privileged_info;
 #line 96 "./src/better_sqlite3.lzz"
-  CS cs;
+  sqlite3_uint64 next_id;
 #line 97 "./src/better_sqlite3.lzz"
-  std::set <Database*, Database::CompareDatabase> dbs;
+  CS cs;
 #line 98 "./src/better_sqlite3.lzz"
+  std::set <Database*, Database::CompareDatabase> dbs;
+#line 99 "./src/better_sqlite3.lzz"
   static uv_key_t thread_key;
 };
 #line 47 "./src/util/object_wrap.lzz"
@@ -1125,9 +1125,9 @@ LZZ_INLINE CustomTable::VTab * CustomTable::Cursor::GetVTab ()
                                                     {
                         return VTab::Upcast(base.pVtab);
 }
-#line 85 "./src/better_sqlite3.lzz"
+#line 86 "./src/better_sqlite3.lzz"
 LZZ_INLINE sqlite3_uint64 Addon::NextId ()
-#line 85 "./src/better_sqlite3.lzz"
+#line 86 "./src/better_sqlite3.lzz"
                                        {
                 return next_id++;
 }

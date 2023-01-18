@@ -70,6 +70,7 @@ struct Addon {
 		if (err != 0) {
 			abort();
 		}
+		sqlite3_initialize();
 		sqlite3_config(SQLITE_CONFIG_LOG, Addon::SqliteLog, nullptr);
 	}
 
