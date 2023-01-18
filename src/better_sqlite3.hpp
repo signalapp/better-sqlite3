@@ -15,6 +15,7 @@
 #include <sqlite3.h>
 #include <node.h>
 #include <node_buffer.h>
+#include <uv.h>
 #line 31 "./src/util/macros.lzz"
 template <class T> using CopyablePersistent = v8::Persistent<T, v8::CopyablePersistentTraits<T>>;
 #line 36 "./src/util/binder.lzz"
@@ -196,11 +197,11 @@ private:
 #line 72 "./src/util/bind-map.lzz"
   int length;
 };
-#line 20 "./src/better_sqlite3.lzz"
-struct Addon;
 #line 21 "./src/better_sqlite3.lzz"
-class Statement;
+struct Addon;
 #line 22 "./src/better_sqlite3.lzz"
+class Statement;
+#line 23 "./src/better_sqlite3.lzz"
 class Backup;
 #line 1 "./src/objects/database.lzz"
 class Database : public ObjectWrapForElectron22
@@ -814,33 +815,43 @@ private:
 #line 203 "./src/util/binder.lzz"
   bool success;
 };
-#line 34 "./src/better_sqlite3.lzz"
+#line 35 "./src/better_sqlite3.lzz"
 struct Addon
 {
-#line 35 "./src/better_sqlite3.lzz"
+#line 36 "./src/better_sqlite3.lzz"
   static void JS_setErrorConstructor (v8::FunctionCallbackInfo <v8 :: Value> const & info);
-#line 40 "./src/better_sqlite3.lzz"
+#line 41 "./src/better_sqlite3.lzz"
+  static void JS_setLogHandler (v8::FunctionCallbackInfo <v8 :: Value> const & info);
+#line 46 "./src/better_sqlite3.lzz"
   static void Cleanup (void * ptr);
-#line 47 "./src/better_sqlite3.lzz"
+#line 53 "./src/better_sqlite3.lzz"
+  static void SqliteLog (void * pArg, int iErrCode, char const * zMsg);
+#line 68 "./src/better_sqlite3.lzz"
+  static void InitLoggerOnce ();
+#line 76 "./src/better_sqlite3.lzz"
   explicit Addon (v8::Isolate * isolate);
-#line 52 "./src/better_sqlite3.lzz"
+#line 85 "./src/better_sqlite3.lzz"
   sqlite3_uint64 NextId ();
-#line 56 "./src/better_sqlite3.lzz"
+#line 89 "./src/better_sqlite3.lzz"
   CopyablePersistent <v8::Function> Statement;
-#line 57 "./src/better_sqlite3.lzz"
+#line 90 "./src/better_sqlite3.lzz"
   CopyablePersistent <v8::Function> StatementIterator;
-#line 58 "./src/better_sqlite3.lzz"
+#line 91 "./src/better_sqlite3.lzz"
   CopyablePersistent <v8::Function> Backup;
-#line 59 "./src/better_sqlite3.lzz"
+#line 92 "./src/better_sqlite3.lzz"
   CopyablePersistent <v8::Function> SqliteError;
-#line 60 "./src/better_sqlite3.lzz"
+#line 93 "./src/better_sqlite3.lzz"
+  CopyablePersistent <v8::Function> LogHandler;
+#line 94 "./src/better_sqlite3.lzz"
   v8::FunctionCallbackInfo <v8 :: Value> const * privileged_info;
-#line 61 "./src/better_sqlite3.lzz"
+#line 95 "./src/better_sqlite3.lzz"
   sqlite3_uint64 next_id;
-#line 62 "./src/better_sqlite3.lzz"
+#line 96 "./src/better_sqlite3.lzz"
   CS cs;
-#line 63 "./src/better_sqlite3.lzz"
+#line 97 "./src/better_sqlite3.lzz"
   std::set <Database*, Database::CompareDatabase> dbs;
+#line 98 "./src/better_sqlite3.lzz"
+  static uv_key_t thread_key;
 };
 #line 47 "./src/util/object_wrap.lzz"
 template <typename T>
@@ -1114,9 +1125,9 @@ LZZ_INLINE CustomTable::VTab * CustomTable::Cursor::GetVTab ()
                                                     {
                         return VTab::Upcast(base.pVtab);
 }
-#line 52 "./src/better_sqlite3.lzz"
+#line 85 "./src/better_sqlite3.lzz"
 LZZ_INLINE sqlite3_uint64 Addon::NextId ()
-#line 52 "./src/better_sqlite3.lzz"
+#line 85 "./src/better_sqlite3.lzz"
                                        {
                 return next_id++;
 }

@@ -17,7 +17,7 @@
 		ctx->Exit();
 		return proto->StrictEquals(baseProto) || proto->StrictEquals(v8::Null(isolate));
 	}
-#line 67 "./src/better_sqlite3.lzz"
+#line 102 "./src/better_sqlite3.lzz"
 NODE_MODULE_INIT(/* exports, context */) {
 	v8::Isolate* isolate = context->GetIsolate();
 	v8::HandleScope scope(isolate);
@@ -33,6 +33,7 @@ NODE_MODULE_INIT(/* exports, context */) {
 	exports->Set(context, InternalizedFromLatin1(isolate, "StatementIterator"), StatementIterator::Init(isolate, data)).FromJust();
 	exports->Set(context, InternalizedFromLatin1(isolate, "Backup"), Backup::Init(isolate, data)).FromJust();
 	exports->Set(context, InternalizedFromLatin1(isolate, "setErrorConstructor"), v8::FunctionTemplate::New(isolate, Addon::JS_setErrorConstructor, data)->GetFunction(context).ToLocalChecked()).FromJust();
+	exports->Set(context, InternalizedFromLatin1(isolate, "setLogHandler"), v8::FunctionTemplate::New(isolate, Addon::JS_setLogHandler, data)->GetFunction(context).ToLocalChecked()).FromJust();
 
 	// Store addon instance data.
 	addon->Statement.Reset(isolate, exports->Get(context, InternalizedFromLatin1(isolate, "Statement")).ToLocalChecked().As<v8::Function>());
@@ -2154,26 +2155,66 @@ Binder::Result Binder::BindArgs (v8::FunctionCallbackInfo <v8 :: Value> const & 
 
                 return { count, bound_object };
 }
-#line 35 "./src/better_sqlite3.lzz"
+#line 36 "./src/better_sqlite3.lzz"
 void Addon::JS_setErrorConstructor (v8::FunctionCallbackInfo <v8 :: Value> const & info)
-#line 35 "./src/better_sqlite3.lzz"
+#line 36 "./src/better_sqlite3.lzz"
                                             {
                 if ( info . Length ( ) <= ( 0 ) || ! info [ 0 ] -> IsFunction ( ) ) return ThrowTypeError ( "Expected " "first" " argument to be " "a function" ) ; v8 :: Local < v8 :: Function > SqliteError = ( info [ 0 ] . As < v8 :: Function > ( ) ) ;
                 static_cast < Addon * > ( info . Data ( ) . As < v8 :: External > ( ) -> Value ( ) ) ->SqliteError.Reset( info . GetIsolate ( ) , SqliteError);
 }
-#line 40 "./src/better_sqlite3.lzz"
+#line 41 "./src/better_sqlite3.lzz"
+void Addon::JS_setLogHandler (v8::FunctionCallbackInfo <v8 :: Value> const & info)
+#line 41 "./src/better_sqlite3.lzz"
+                                      {
+                if ( info . Length ( ) <= ( 0 ) || ! info [ 0 ] -> IsFunction ( ) ) return ThrowTypeError ( "Expected " "first" " argument to be " "a function" ) ; v8 :: Local < v8 :: Function > LogHandler = ( info [ 0 ] . As < v8 :: Function > ( ) ) ;
+                static_cast < Addon * > ( info . Data ( ) . As < v8 :: External > ( ) -> Value ( ) ) ->LogHandler.Reset( info . GetIsolate ( ) , LogHandler);
+}
+#line 46 "./src/better_sqlite3.lzz"
 void Addon::Cleanup (void * ptr)
-#line 40 "./src/better_sqlite3.lzz"
+#line 46 "./src/better_sqlite3.lzz"
                                        {
                 Addon* addon = static_cast<Addon*>(ptr);
                 for (Database* db : addon->dbs) db->CloseHandles();
                 addon->dbs.clear();
                 delete addon;
 }
-#line 47 "./src/better_sqlite3.lzz"
+#line 53 "./src/better_sqlite3.lzz"
+void Addon::SqliteLog (void * pArg, int iErrCode, char const * zMsg)
+#line 53 "./src/better_sqlite3.lzz"
+                                                                          {
+                Addon* addon = static_cast<Addon*>(uv_key_get(&thread_key));
+                if (addon->LogHandler.IsEmpty()) {
+                        return;
+                }
+                v8 :: Isolate * isolate = v8 :: Isolate :: GetCurrent ( ) ;
+                v8::HandleScope scope(isolate);
+                v8::Local<v8::Function> handler = addon->LogHandler.Get(isolate);
+                v8::Local<v8::Value> arg[] = {
+                        v8::Integer::New(isolate, static_cast<int32_t>(iErrCode)),
+                        StringFromUtf8(isolate, zMsg, -1)
+                };
+                handler->Call(isolate->GetCurrentContext(), v8::Undefined(isolate), 2, arg).ToLocalChecked();
+}
+#line 68 "./src/better_sqlite3.lzz"
+void Addon::InitLoggerOnce ()
+#line 68 "./src/better_sqlite3.lzz"
+                                     {
+                int err = uv_key_create(&thread_key);
+                if (err != 0) {
+                        abort();
+                }
+                sqlite3_config(SQLITE_CONFIG_LOG, Addon::SqliteLog, nullptr);
+}
+#line 76 "./src/better_sqlite3.lzz"
 Addon::Addon (v8::Isolate * isolate)
-#line 47 "./src/better_sqlite3.lzz"
+#line 76 "./src/better_sqlite3.lzz"
   : privileged_info (NULL), next_id (0), cs (isolate)
-#line 50 "./src/better_sqlite3.lzz"
-                            {}
+#line 79 "./src/better_sqlite3.lzz"
+                            {
+                static uv_once_t init_once = UV_ONCE_INIT;
+                uv_once(&init_once, InitLoggerOnce);
+                uv_key_set(&thread_key, this);
+}
+#line 98 "./src/better_sqlite3.lzz"
+uv_key_t Addon::thread_key;
 #undef LZZ_INLINE

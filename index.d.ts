@@ -90,6 +90,8 @@ declare namespace BetterSqlite3 {
         prototype: Database;
 
         SqliteError: typeof SqliteError;
+
+        setLogHandler(fn: (code: number, value: string) => void): void;
     }
 }
 

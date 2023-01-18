@@ -10,6 +10,7 @@
 #include <sqlite3.h>
 #include <node.h>
 #include <node_buffer.h>
+#include <uv.h>
 #end
 
 #insert "util/object_wrap.lzz"
@@ -37,6 +38,11 @@ struct Addon {
 		OnlyAddon->SqliteError.Reset(OnlyIsolate, SqliteError);
 	}
 
+	NODE_METHOD(JS_setLogHandler) {
+		REQUIRE_ARGUMENT_FUNCTION(first, v8::Local<v8::Function> LogHandler);
+		OnlyAddon->LogHandler.Reset(OnlyIsolate, LogHandler);
+	}
+
 	static void Cleanup(void* ptr) {
 		Addon* addon = static_cast<Addon*>(ptr);
 		for (Database* db : addon->dbs) db->CloseHandles();
@@ -44,10 +50,37 @@ struct Addon {
 		delete addon;
 	}
 
+	static void SqliteLog(void *pArg, int iErrCode, const char *zMsg) {
+		Addon* addon = static_cast<Addon*>(uv_key_get(&thread_key));
+		if (addon->LogHandler.IsEmpty()) {
+			return;
+		}
+		EasyIsolate;
+		v8::HandleScope scope(isolate);
+		v8::Local<v8::Function> handler = addon->LogHandler.Get(isolate);
+		v8::Local<v8::Value> arg[] = {
+			v8::Integer::New(isolate, static_cast<int32_t>(iErrCode)),
+			StringFromUtf8(isolate, zMsg, -1)
+		};
+		handler->Call(isolate->GetCurrentContext(), v8::Undefined(isolate), 2, arg).ToLocalChecked();
+	}
+
+	static void InitLoggerOnce() {
+		int err = uv_key_create(&thread_key);
+		if (err != 0) {
+			abort();
+		}
+		sqlite3_config(SQLITE_CONFIG_LOG, Addon::SqliteLog, nullptr);
+	}
+
 	explicit Addon(v8::Isolate* isolate) :
 		privileged_info(NULL),
 		next_id(0),
-		cs(isolate) {}
+		cs(isolate) {
+		static uv_once_t init_once = UV_ONCE_INIT;
+		uv_once(&init_once, InitLoggerOnce);
+		uv_key_set(&thread_key, this);
+	}
 
 	inline sqlite3_uint64 NextId() {
 		return next_id++;
@@ -57,10 +90,12 @@ struct Addon {
 	CopyablePersistent<v8::Function> StatementIterator;
 	CopyablePersistent<v8::Function> Backup;
 	CopyablePersistent<v8::Function> SqliteError;
+	CopyablePersistent<v8::Function> LogHandler;
 	NODE_ARGUMENTS_POINTER privileged_info;
 	sqlite3_uint64 next_id;
 	CS cs;
 	std::set<Database*, Database::CompareDatabase> dbs;
+	static uv_key_t thread_key;
 };
 
 #src
@@ -79,6 +114,7 @@ NODE_MODULE_INIT(/* exports, context */) {
 	exports->Set(context, InternalizedFromLatin1(isolate, "StatementIterator"), StatementIterator::Init(isolate, data)).FromJust();
 	exports->Set(context, InternalizedFromLatin1(isolate, "Backup"), Backup::Init(isolate, data)).FromJust();
 	exports->Set(context, InternalizedFromLatin1(isolate, "setErrorConstructor"), v8::FunctionTemplate::New(isolate, Addon::JS_setErrorConstructor, data)->GetFunction(context).ToLocalChecked()).FromJust();
+	exports->Set(context, InternalizedFromLatin1(isolate, "setLogHandler"), v8::FunctionTemplate::New(isolate, Addon::JS_setLogHandler, data)->GetFunction(context).ToLocalChecked()).FromJust();
 
 	// Store addon instance data.
 	addon->Statement.Reset(isolate, exports->Get(context, InternalizedFromLatin1(isolate, "Statement")).ToLocalChecked().As<v8::Function>());
