@@ -65,8 +65,8 @@ describe('Database#serialize()', function () {
 	});
 
 	it("should support punctuation", function() {
-		this.insertStmt.run("hello!world!");
+		this.insertStmt.run("hello!world!  how are you?");
 		const rows = this.lookupStmt.all({ query: "h*" });
-		expect(rows).to.eql(["[hello]!world!"]);
+		expect(rows).to.eql(["[hello]!world!  [how] are you?"]);
 	});
 });
