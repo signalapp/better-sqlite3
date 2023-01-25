@@ -43,6 +43,15 @@ declare namespace BetterSqlite3 {
         type: string | null;
     }
 
+    interface Tokenizer {
+      run(value: string): ReadonlyArray<number | string>;
+      destroy(): void;
+    }
+
+    interface TokenizerConstructor {
+      new (params: ReadonlyArray<string>): Tokenizer;
+    }
+
     interface Transaction<F extends VariableArgFunction> {
         (...params: ArgumentTypes<F>): ReturnType<F>;
         default(...params: ArgumentTypes<F>): ReturnType<F>;
@@ -82,6 +91,7 @@ declare namespace BetterSqlite3 {
         table(name: string, options: VirtualTableOptions): this;
         unsafeMode(unsafe?: boolean): this;
         serialize(options?: Database.SerializeOptions): Buffer;
+        createTokenizer(name: string, tokenizer: TokenizerConstructor): void;
     }
 
     interface DatabaseConstructor {
@@ -114,7 +124,6 @@ declare namespace Database {
         timeout?: number | undefined;
         verbose?: ((message?: any, ...additionalArgs: any[]) => void) | undefined;
         nativeBinding?: string | undefined;
-        tokenizer?: (value: string) => ReadonlyArray<string | number>;
     }
 
     interface SerializeOptions {
