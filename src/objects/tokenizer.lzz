@@ -2,24 +2,12 @@ class Tokenizer {
 public:
 	Tokenizer(
 		v8::Isolate* isolate,
-		v8::Local<v8::Function> run_fn,
-		v8::Local<v8::Function> destroy_fn
+		v8::Local<v8::Function> run_fn
 	): isolate(isolate),
-		run_fn(isolate, run_fn),
-		destroy_fn(isolate, destroy_fn) {
+		run_fn(isolate, run_fn) {
 	}
 
-	~Tokenizer() {
-		v8::HandleScope scope(isolate);
-		UseContext;
-
-		// Don't run ToLocalChecked since this destructor might run on teardown.
-		(void) destroy_fn.Get(isolate)->Call(
-			ctx,
-			v8::Undefined(isolate),
-			0,
-			nullptr);
-	}
+	~Tokenizer() {}
 
 	int Run(
 		void* pCtx,
@@ -79,7 +67,6 @@ public:
 private:
 	v8::Isolate* isolate;
 	const CopyablePersistent<v8::Function> run_fn;
-	const CopyablePersistent<v8::Function> destroy_fn;
 }
 
 class TokenizerModule {
@@ -112,18 +99,13 @@ private:
 		v8::Local<v8::Value> arg[] = {
 			params,
 		};
-		v8::Local<v8::Array> methods = create_instance_fn.Get(isolate)->Call(
+		v8::Local<v8::Function> run_fn = create_instance_fn.Get(isolate)->Call(
 			ctx,
 			v8::Undefined(isolate),
 			1,
-			arg).ToLocalChecked().As<v8::Array>();
+			arg).ToLocalChecked().As<v8::Function>();
 
-		v8::Local<v8::Function> run_fn = methods->Get(ctx, kRunIndex)
-			.ToLocalChecked().As<v8::Function>();
-		v8::Local<v8::Function> destroy_fn = methods->Get(ctx, kDestroyIndex)
-			.ToLocalChecked().As<v8::Function>();
-
-		return new Tokenizer(isolate, run_fn, destroy_fn);
+		return new Tokenizer(isolate, run_fn);
 	}
 
 	static int xCreate(
@@ -158,9 +140,6 @@ private:
 		.xDelete = &xDelete,
 		.xTokenize = &xTokenize,
 	};
-
-	static const uint32_t kRunIndex = 0;
-	static const uint32_t kDestroyIndex = 1;
 
 	v8::Isolate* isolate;
 	const CopyablePersistent<v8::Function> create_instance_fn;

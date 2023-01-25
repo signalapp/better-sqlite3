@@ -1419,28 +1419,18 @@ void Backup::JS_close (v8::FunctionCallbackInfo <v8 :: Value> const & info)
                 info.GetReturnValue().Set(info.This());
 }
 #line 3 "./src/objects/tokenizer.lzz"
-Tokenizer::Tokenizer (v8::Isolate * isolate, v8::Local <v8::Function> run_fn, v8::Local <v8::Function> destroy_fn)
+Tokenizer::Tokenizer (v8::Isolate * isolate, v8::Local <v8::Function> run_fn)
+#line 6 "./src/objects/tokenizer.lzz"
+  : isolate (isolate), run_fn (isolate, run_fn)
 #line 7 "./src/objects/tokenizer.lzz"
-  : isolate (isolate), run_fn (isolate, run_fn), destroy_fn (isolate, destroy_fn)
-#line 9 "./src/objects/tokenizer.lzz"
-                                                {}
-#line 12 "./src/objects/tokenizer.lzz"
+                                        {}
+#line 10 "./src/objects/tokenizer.lzz"
 Tokenizer::~ Tokenizer ()
+#line 10 "./src/objects/tokenizer.lzz"
+                     {}
 #line 12 "./src/objects/tokenizer.lzz"
-                     {
-                v8::HandleScope scope(isolate);
-                v8 :: Local < v8 :: Context > ctx = isolate -> GetCurrentContext ( ) ;
-
-
-                (void) destroy_fn.Get(isolate)->Call(
-                        ctx,
-                        v8::Undefined(isolate),
-                        0,
-                        nullptr);
-}
-#line 24 "./src/objects/tokenizer.lzz"
 int Tokenizer::Run (void * pCtx, char const * pText, int nText, int (* xToken) (void *, int, char const *, int, int, int))
-#line 31 "./src/objects/tokenizer.lzz"
+#line 19 "./src/objects/tokenizer.lzz"
           {
                 v8::HandleScope scope(isolate);
                 v8 :: Local < v8 :: Context > ctx = isolate -> GetCurrentContext ( ) ;
@@ -1488,22 +1478,22 @@ int Tokenizer::Run (void * pCtx, char const * pText, int nText, int (* xToken) (
                 }
                 return SQLITE_OK;
 }
-#line 87 "./src/objects/tokenizer.lzz"
+#line 74 "./src/objects/tokenizer.lzz"
 TokenizerModule::TokenizerModule (v8::Isolate * isolate, v8::Local <v8::Function> create_instance_fn)
-#line 90 "./src/objects/tokenizer.lzz"
+#line 77 "./src/objects/tokenizer.lzz"
   : isolate (isolate), create_instance_fn (isolate, create_instance_fn)
-#line 90 "./src/objects/tokenizer.lzz"
+#line 77 "./src/objects/tokenizer.lzz"
                                                                              {}
-#line 93 "./src/objects/tokenizer.lzz"
+#line 80 "./src/objects/tokenizer.lzz"
 void TokenizerModule::xDestroy (void * pCtx)
-#line 93 "./src/objects/tokenizer.lzz"
+#line 80 "./src/objects/tokenizer.lzz"
                                          {
                 TokenizerModule* m = static_cast<TokenizerModule*>(pCtx);
                 delete m;
 }
-#line 103 "./src/objects/tokenizer.lzz"
+#line 90 "./src/objects/tokenizer.lzz"
 Tokenizer * TokenizerModule::CreateInstance (char const * * azArg, int nArg)
-#line 103 "./src/objects/tokenizer.lzz"
+#line 90 "./src/objects/tokenizer.lzz"
                                                                 {
                 v8::HandleScope scope(isolate);
                 v8 :: Local < v8 :: Context > ctx = isolate -> GetCurrentContext ( ) ;
@@ -1516,52 +1506,43 @@ Tokenizer * TokenizerModule::CreateInstance (char const * * azArg, int nArg)
                 v8::Local<v8::Value> arg[] = {
                         params,
                 };
-                v8::Local<v8::Array> methods = create_instance_fn.Get(isolate)->Call(
+                v8::Local<v8::Function> run_fn = create_instance_fn.Get(isolate)->Call(
                         ctx,
                         v8::Undefined(isolate),
                         1,
-                        arg).ToLocalChecked().As<v8::Array>();
+                        arg).ToLocalChecked().As<v8::Function>();
 
-                v8::Local<v8::Function> run_fn = methods->Get(ctx, kRunIndex)
-                        .ToLocalChecked().As<v8::Function>();
-                v8::Local<v8::Function> destroy_fn = methods->Get(ctx, kDestroyIndex)
-                        .ToLocalChecked().As<v8::Function>();
-
-                return new Tokenizer(isolate, run_fn, destroy_fn);
+                return new Tokenizer(isolate, run_fn);
 }
-#line 129 "./src/objects/tokenizer.lzz"
+#line 111 "./src/objects/tokenizer.lzz"
 int TokenizerModule::xCreate (void * pCtx, char const * * azArg, int nArg, Fts5Tokenizer * * ppOut)
-#line 130 "./src/objects/tokenizer.lzz"
+#line 112 "./src/objects/tokenizer.lzz"
                                                                                  {
                 TokenizerModule* m = static_cast<TokenizerModule*>(pCtx);
                 *ppOut = reinterpret_cast<Fts5Tokenizer*>(m->CreateInstance(azArg, nArg));
                 return SQLITE_OK;
 }
-#line 136 "./src/objects/tokenizer.lzz"
+#line 118 "./src/objects/tokenizer.lzz"
 void TokenizerModule::xDelete (Fts5Tokenizer * tokenizer)
-#line 136 "./src/objects/tokenizer.lzz"
+#line 118 "./src/objects/tokenizer.lzz"
                                                       {
                 Tokenizer* t = reinterpret_cast<Tokenizer*>(tokenizer);
                 delete t;
 }
-#line 141 "./src/objects/tokenizer.lzz"
+#line 123 "./src/objects/tokenizer.lzz"
 int TokenizerModule::xTokenize (Fts5Tokenizer * tokenizer, void * pCtx, int flags, char const * pText, int nText, int (* xToken) (void *, int, char const *, int, int, int))
-#line 150 "./src/objects/tokenizer.lzz"
+#line 132 "./src/objects/tokenizer.lzz"
           {
                 Tokenizer* t = reinterpret_cast<Tokenizer*>(tokenizer);
 
                 return t->Run(pCtx, pText, nText, xToken);
 }
-#line 156 "./src/objects/tokenizer.lzz"
+#line 138 "./src/objects/tokenizer.lzz"
 fts5_tokenizer TokenizerModule::api_object = {
                 .xCreate = &xCreate,
                 .xDelete = &xDelete,
                 .xTokenize = &xTokenize,
         };
-#line 162 "./src/objects/tokenizer.lzz"
-uint32_t const TokenizerModule::kRunIndex = 0;
-#line 163 "./src/objects/tokenizer.lzz"
-uint32_t const TokenizerModule::kDestroyIndex = 1;
 #line 4 "./src/util/data-converter.lzz"
 void DataConverter::ThrowDataConversionError (sqlite3_context * invocation, bool isBigInt)
 #line 4 "./src/util/data-converter.lzz"

@@ -519,50 +519,44 @@ class Tokenizer
 #line 2 "./src/objects/tokenizer.lzz"
 public:
 #line 3 "./src/objects/tokenizer.lzz"
-  Tokenizer (v8::Isolate * isolate, v8::Local <v8::Function> run_fn, v8::Local <v8::Function> destroy_fn);
-#line 12 "./src/objects/tokenizer.lzz"
+  Tokenizer (v8::Isolate * isolate, v8::Local <v8::Function> run_fn);
+#line 10 "./src/objects/tokenizer.lzz"
   ~ Tokenizer ();
-#line 24 "./src/objects/tokenizer.lzz"
+#line 12 "./src/objects/tokenizer.lzz"
   int Run (void * pCtx, char const * pText, int nText, int (* xToken) (void *, int, char const *, int, int, int));
-#line 79 "./src/objects/tokenizer.lzz"
+#line 67 "./src/objects/tokenizer.lzz"
 private:
-#line 80 "./src/objects/tokenizer.lzz"
+#line 68 "./src/objects/tokenizer.lzz"
   v8::Isolate * isolate;
-#line 81 "./src/objects/tokenizer.lzz"
+#line 69 "./src/objects/tokenizer.lzz"
   CopyablePersistent <v8::Function> const run_fn;
-#line 82 "./src/objects/tokenizer.lzz"
-  CopyablePersistent <v8::Function> const destroy_fn;
 };
-#line 85 "./src/objects/tokenizer.lzz"
+#line 72 "./src/objects/tokenizer.lzz"
 class TokenizerModule
 {
-#line 86 "./src/objects/tokenizer.lzz"
+#line 73 "./src/objects/tokenizer.lzz"
 public:
-#line 87 "./src/objects/tokenizer.lzz"
+#line 74 "./src/objects/tokenizer.lzz"
   TokenizerModule (v8::Isolate * isolate, v8::Local <v8::Function> create_instance_fn);
-#line 93 "./src/objects/tokenizer.lzz"
+#line 80 "./src/objects/tokenizer.lzz"
   static void xDestroy (void * pCtx);
-#line 98 "./src/objects/tokenizer.lzz"
+#line 85 "./src/objects/tokenizer.lzz"
   fts5_tokenizer * get_api_object ();
-#line 102 "./src/objects/tokenizer.lzz"
+#line 89 "./src/objects/tokenizer.lzz"
 private:
-#line 103 "./src/objects/tokenizer.lzz"
+#line 90 "./src/objects/tokenizer.lzz"
   Tokenizer * CreateInstance (char const * * azArg, int nArg);
-#line 129 "./src/objects/tokenizer.lzz"
+#line 111 "./src/objects/tokenizer.lzz"
   static int xCreate (void * pCtx, char const * * azArg, int nArg, Fts5Tokenizer * * ppOut);
-#line 136 "./src/objects/tokenizer.lzz"
+#line 118 "./src/objects/tokenizer.lzz"
   static void xDelete (Fts5Tokenizer * tokenizer);
-#line 141 "./src/objects/tokenizer.lzz"
+#line 123 "./src/objects/tokenizer.lzz"
   static int xTokenize (Fts5Tokenizer * tokenizer, void * pCtx, int flags, char const * pText, int nText, int (* xToken) (void *, int, char const *, int, int, int));
-#line 156 "./src/objects/tokenizer.lzz"
+#line 138 "./src/objects/tokenizer.lzz"
   static fts5_tokenizer api_object;
-#line 162 "./src/objects/tokenizer.lzz"
-  static uint32_t const kRunIndex;
-#line 163 "./src/objects/tokenizer.lzz"
-  static uint32_t const kDestroyIndex;
-#line 165 "./src/objects/tokenizer.lzz"
+#line 144 "./src/objects/tokenizer.lzz"
   v8::Isolate * isolate;
-#line 166 "./src/objects/tokenizer.lzz"
+#line 145 "./src/objects/tokenizer.lzz"
   CopyablePersistent <v8::Function> const create_instance_fn;
 };
 #line 1 "./src/util/data-converter.lzz"
@@ -1104,9 +1098,9 @@ LZZ_INLINE bool Backup::Compare (Backup const * const a, Backup const * const b)
                                                                                    {
                 return a->id < b->id;
 }
-#line 98 "./src/objects/tokenizer.lzz"
+#line 85 "./src/objects/tokenizer.lzz"
 LZZ_INLINE fts5_tokenizer * TokenizerModule::get_api_object ()
-#line 98 "./src/objects/tokenizer.lzz"
+#line 85 "./src/objects/tokenizer.lzz"
                                                 {
                 return &api_object;
 }

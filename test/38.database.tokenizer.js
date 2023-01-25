@@ -12,16 +12,12 @@ function removeDiacritics(str) {
 }
 
 describe('Database#serialize()', function () {
-	let aliveTokenizers;
 	beforeEach(function () {
 		this.db = new Database(':memory:');
-
-		aliveTokenizers = 0;
 
 		this.db.createTokenizer('js', class Tokenizer {
 			constructor(params) {
 				expect(params).to.eql(['arg1', 'arg2']);
-				aliveTokenizers++;
 			}
 
 			run(str) {
@@ -36,10 +32,6 @@ describe('Database#serialize()', function () {
 				}
 				return result;
 			}
-
-			destroy() {
-				aliveTokenizers--;
-			}
 		});
 
 		this.db.prepare("CREATE VIRTUAL TABLE fts USING fts5(content, tokenize='js arg1 arg2')").run();
@@ -51,7 +43,6 @@ describe('Database#serialize()', function () {
 	});
 	afterEach(function () {
 		this.db.close();
-		expect(aliveTokenizers).to.equal(0);
 	});
 
 	it("should support CJK symbols at the start", function() {
