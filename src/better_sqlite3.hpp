@@ -283,66 +283,78 @@ public:
 #line 124 "./src/objects/database.lzz"
 private:
 #line 126 "./src/objects/database.lzz"
-  explicit Database (v8::Isolate * isolate, Addon * addon, sqlite3 * db_handle, v8::Local <v8::Value> logger);
-#line 149 "./src/objects/database.lzz"
+  explicit Database (v8::Isolate * isolate, Addon * addon, sqlite3 * db_handle, v8::Local <v8::Value> logger, v8::Local <v8::Function> tokenize_fn);
+#line 152 "./src/objects/database.lzz"
   static void JS_new (v8::FunctionCallbackInfo <v8 :: Value> const & info);
-#line 201 "./src/objects/database.lzz"
+#line 205 "./src/objects/database.lzz"
   static void JS_prepare (v8::FunctionCallbackInfo <v8 :: Value> const & info);
-#line 217 "./src/objects/database.lzz"
+#line 221 "./src/objects/database.lzz"
   static void JS_exec (v8::FunctionCallbackInfo <v8 :: Value> const & info);
-#line 257 "./src/objects/database.lzz"
+#line 261 "./src/objects/database.lzz"
   static void JS_backup (v8::FunctionCallbackInfo <v8 :: Value> const & info);
-#line 275 "./src/objects/database.lzz"
+#line 279 "./src/objects/database.lzz"
   static void JS_serialize (v8::FunctionCallbackInfo <v8 :: Value> const & info);
-#line 297 "./src/objects/database.lzz"
+#line 301 "./src/objects/database.lzz"
   static void JS_function (v8::FunctionCallbackInfo <v8 :: Value> const & info);
-#line 321 "./src/objects/database.lzz"
+#line 325 "./src/objects/database.lzz"
   static void JS_aggregate (v8::FunctionCallbackInfo <v8 :: Value> const & info);
-#line 350 "./src/objects/database.lzz"
+#line 354 "./src/objects/database.lzz"
   static void JS_table (v8::FunctionCallbackInfo <v8 :: Value> const & info);
-#line 370 "./src/objects/database.lzz"
+#line 374 "./src/objects/database.lzz"
   static void JS_loadExtension (v8::FunctionCallbackInfo <v8 :: Value> const & info);
-#line 392 "./src/objects/database.lzz"
+#line 396 "./src/objects/database.lzz"
   static void JS_close (v8::FunctionCallbackInfo <v8 :: Value> const & info);
-#line 402 "./src/objects/database.lzz"
+#line 406 "./src/objects/database.lzz"
   static void JS_defaultSafeIntegers (v8::FunctionCallbackInfo <v8 :: Value> const & info);
-#line 408 "./src/objects/database.lzz"
+#line 412 "./src/objects/database.lzz"
   static void JS_unsafeMode (v8::FunctionCallbackInfo <v8 :: Value> const & info);
-#line 415 "./src/objects/database.lzz"
-  static void JS_open (v8::Local <v8 :: String> _, v8::PropertyCallbackInfo <v8 :: Value> const & info);
 #line 419 "./src/objects/database.lzz"
+  static void JS_open (v8::Local <v8 :: String> _, v8::PropertyCallbackInfo <v8 :: Value> const & info);
+#line 423 "./src/objects/database.lzz"
   static void JS_inTransaction (v8::Local <v8 :: String> _, v8::PropertyCallbackInfo <v8 :: Value> const & info);
-#line 424 "./src/objects/database.lzz"
+#line 428 "./src/objects/database.lzz"
   static bool Deserialize (v8::Local <v8::Object> buffer, Addon * addon, sqlite3 * db_handle, bool readonly);
-#line 449 "./src/objects/database.lzz"
-  static void FreeSerialization (char * data, void * _);
 #line 453 "./src/objects/database.lzz"
-  static int const MAX_BUFFER_SIZE = node::Buffer::kMaxLength > INT_MAX ? INT_MAX : static_cast<int>(node::Buffer::kMaxLength);
-#line 454 "./src/objects/database.lzz"
-  static int const MAX_STRING_SIZE = v8::String::kMaxLength > INT_MAX ? INT_MAX : static_cast<int>(v8::String::kMaxLength);
-#line 456 "./src/objects/database.lzz"
-  sqlite3 * const db_handle;
+  static void FreeSerialization (char * data, void * _);
 #line 457 "./src/objects/database.lzz"
+  void InitFTS5Tokenizer ();
+#line 481 "./src/objects/database.lzz"
+  static int CreateFTSTokenizer (void * pCtx, char const * * azArg, int nArg, Fts5Tokenizer * * ppOut);
+#line 487 "./src/objects/database.lzz"
+  static void DeleteFTSTokenizer (Fts5Tokenizer * tokenizer);
+#line 491 "./src/objects/database.lzz"
+  static int RunFTSTokenizer (Fts5Tokenizer * tokenizer, void * pCtx, int flags, char const * pText, int nText, int (* xToken) (void *, int, char const *, int, int, int));
+#line 547 "./src/objects/database.lzz"
+  static int const MAX_BUFFER_SIZE = node::Buffer::kMaxLength > INT_MAX ? INT_MAX : static_cast<int>(node::Buffer::kMaxLength);
+#line 548 "./src/objects/database.lzz"
+  static int const MAX_STRING_SIZE = v8::String::kMaxLength > INT_MAX ? INT_MAX : static_cast<int>(v8::String::kMaxLength);
+#line 550 "./src/objects/database.lzz"
+  static fts5_tokenizer js_tokenizer;
+#line 556 "./src/objects/database.lzz"
+  sqlite3 * const db_handle;
+#line 557 "./src/objects/database.lzz"
   bool open;
-#line 458 "./src/objects/database.lzz"
+#line 558 "./src/objects/database.lzz"
   bool busy;
-#line 459 "./src/objects/database.lzz"
+#line 559 "./src/objects/database.lzz"
   bool safe_ints;
-#line 460 "./src/objects/database.lzz"
+#line 560 "./src/objects/database.lzz"
   bool unsafe_mode;
-#line 461 "./src/objects/database.lzz"
+#line 561 "./src/objects/database.lzz"
   bool was_js_error;
-#line 462 "./src/objects/database.lzz"
+#line 562 "./src/objects/database.lzz"
   bool const has_logger;
-#line 463 "./src/objects/database.lzz"
+#line 563 "./src/objects/database.lzz"
   unsigned short int iterators;
-#line 464 "./src/objects/database.lzz"
+#line 564 "./src/objects/database.lzz"
   Addon * const addon;
-#line 465 "./src/objects/database.lzz"
+#line 565 "./src/objects/database.lzz"
   CopyablePersistent <v8::Value> const logger;
-#line 466 "./src/objects/database.lzz"
+#line 566 "./src/objects/database.lzz"
+  CopyablePersistent <v8::Function> const tokenize_fn;
+#line 567 "./src/objects/database.lzz"
   std::set <Statement*, CompareStatement> stmts;
-#line 467 "./src/objects/database.lzz"
+#line 568 "./src/objects/database.lzz"
   std::set <Backup*, CompareBackup> backups;
 };
 #line 1 "./src/objects/statement.lzz"

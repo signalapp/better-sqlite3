@@ -114,6 +114,7 @@ declare namespace Database {
         timeout?: number | undefined;
         verbose?: ((message?: any, ...additionalArgs: any[]) => void) | undefined;
         nativeBinding?: string | undefined;
+        tokenizer?: (value: string) => ReadonlyArray<string | number>;
     }
 
     interface SerializeOptions {
