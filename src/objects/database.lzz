@@ -14,6 +14,7 @@ public:
 		SetPrototypeMethod(isolate, data, t, "close", JS_close);
 		SetPrototypeMethod(isolate, data, t, "defaultSafeIntegers", JS_defaultSafeIntegers);
 		SetPrototypeMethod(isolate, data, t, "unsafeMode", JS_unsafeMode);
+		SetPrototypeMethod(isolate, data, t, "createTokenizer", JS_createTokenizer);
 		SetPrototypeGetter(isolate, data, t, "open", JS_open);
 		SetPrototypeGetter(isolate, data, t, "inTransaction", JS_inTransaction);
 		return t->GetFunction(OnlyContext).ToLocalChecked();
@@ -127,8 +128,7 @@ private:
 		v8::Isolate* isolate,
 		Addon* addon,
 		sqlite3* db_handle,
-		v8::Local<v8::Value> logger,
-		v8::Local<v8::Function> tokenize_fn
+		v8::Local<v8::Value> logger
 	) :
 		ObjectWrapForElectron22(),
 		db_handle(db_handle),
@@ -141,11 +141,9 @@ private:
 		iterators(0),
 		addon(addon),
 		logger(isolate, logger),
-		tokenize_fn(isolate, tokenize_fn),
 		stmts(),
 		backups() {
 		assert(db_handle != NULL);
-		InitFTS5Tokenizer();
 		addon->dbs.insert(this);
 	}
 
@@ -159,7 +157,6 @@ private:
 		REQUIRE_ARGUMENT_INT32(sixth, int timeout);
 		REQUIRE_ARGUMENT_ANY(seventh, v8::Local<v8::Value> logger);
 		REQUIRE_ARGUMENT_ANY(eighth, v8::Local<v8::Value> buffer);
-		REQUIRE_ARGUMENT_FUNCTION(ninth, v8::Local<v8::Function> tokenize_fn);
 
 		UseAddon;
 		UseIsolate;
@@ -193,7 +190,7 @@ private:
 		}
 
 		UseContext;
-		Database* db = new Database(isolate, addon, db_handle, logger, tokenize_fn);
+		Database* db = new Database(isolate, addon, db_handle, logger);
 		db->Wrap(info.This());
 		SetFrozen(isolate, ctx, info.This(), addon->cs.memory, v8::Boolean::New(isolate, in_memory));
 		SetFrozen(isolate, ctx, info.This(), addon->cs.readonly, v8::Boolean::New(isolate, readonly));
@@ -416,6 +413,42 @@ private:
 		sqlite3_db_config(db->db_handle, SQLITE_DBCONFIG_DEFENSIVE, static_cast<int>(!db->unsafe_mode), NULL);
 	}
 
+	NODE_METHOD(JS_createTokenizer) {
+		UseAddon;
+		UseIsolate;
+
+		Database* db = Unwrap<Database>(info.This());
+		REQUIRE_ARGUMENT_STRING(first, v8::Local<v8::String> name);
+		REQUIRE_ARGUMENT_FUNCTION(second, v8::Local<v8::Function> create_instance_fn);
+
+		// Get fts5_api object
+		int rc;
+		sqlite3_stmt *pStmt = nullptr;
+
+		rc = sqlite3_prepare(db->db_handle, "SELECT fts5(?1)", -1, &pStmt, 0);
+		if (rc != SQLITE_OK) {
+			ThrowSqliteError(addon, db->db_handle);
+			return;
+		}
+
+		fts5_api *fts5 = nullptr;
+		sqlite3_bind_pointer(pStmt, 1, (void*)&fts5, "fts5_api_ptr", nullptr);
+		sqlite3_step(pStmt);
+		rc = sqlite3_finalize(pStmt);
+		if (rc != SQLITE_OK) {
+			ThrowSqliteError(addon, db->db_handle);
+			return;
+		}
+
+		assert(fts5 != nullptr);
+
+		TokenizerModule* t = new TokenizerModule(isolate, create_instance_fn);
+
+		v8::String::Utf8Value utf8(isolate, name);
+		fts5->xCreateTokenizer(fts5, *utf8, t, t->get_api_object(),
+			&TokenizerModule::xDestroy);
+	}
+
 	NODE_GETTER(JS_open) {
 		info.GetReturnValue().Set(Unwrap<Database>(info.This())->open);
 	}
@@ -454,104 +487,8 @@ private:
 		sqlite3_free(data);
 	}
 
-	void InitFTS5Tokenizer() {
-		int rc;
-		sqlite3_stmt *pStmt = nullptr;
-
-		rc = sqlite3_prepare(db_handle, "SELECT fts5(?1)", -1, &pStmt, 0);
-		if (rc != SQLITE_OK) {
-			ThrowSqliteError(addon, db_handle);
-			abort();
-		}
-
-		fts5_api *fts5 = nullptr;
-		sqlite3_bind_pointer(pStmt, 1, (void*)&fts5, "fts5_api_ptr", nullptr);
-		sqlite3_step(pStmt);
-		rc = sqlite3_finalize(pStmt);
-		if (rc != SQLITE_OK) {
-			ThrowSqliteError(addon, db_handle);
-			abort();
-		}
-
-		assert(fts5 != nullptr);
-
-		fts5->xCreateTokenizer(fts5, "js", this, &js_tokenizer, nullptr);
-	}
-
-	static int CreateFTSTokenizer(
-		void* pCtx, const char** azArg, int nArg, Fts5Tokenizer** ppOut) {
-		*ppOut = static_cast<Fts5Tokenizer*>(pCtx);
-		return SQLITE_OK;
-	}
-
-	static void DeleteFTSTokenizer(Fts5Tokenizer* tokenizer) {
-		// Do nothing
-	}
-
-	static int RunFTSTokenizer(
-			Fts5Tokenizer* tokenizer,
-			void *pCtx,
-			int flags,
-			const char *pText,
-			int nText,
-			int (*xToken)(
-				void* pCtx, int tflags, const char* pToken, int nToken,
-				int iStart, int iEnd)
-	) {
-		Database* db = reinterpret_cast<Database*>(tokenizer);
-		EasyIsolate;
-		v8::HandleScope scope(isolate);
-		UseContext;
-		v8::Local<v8::Function> handler = db->tokenize_fn.Get(isolate);
-		v8::Local<v8::Value> arg[] = {
-			StringFromUtf8(isolate, pText, nText)
-		};
-		v8::Local<v8::Value> result = handler->Call(
-			ctx,
-			v8::Undefined(isolate),
-			1,
-			arg).ToLocalChecked();
-		if (!result->IsArray()) {
-			ThrowTypeError("Expected array return value of tokenizer");
-			return SQLITE_MISUSE;
-		}
-		v8::Local<v8::Array> indices = result.As<v8::Array>();
-		int len = indices->Length();
-		if (len % 3 != 0) {
-			return SQLITE_MISUSE;
-		}
-		for (int i = 0; i < len; i += 3) {
-			int64_t segment_start =
-				indices->Get(ctx, i).ToLocalChecked()->IntegerValue(ctx).ToChecked();
-			int64_t segment_end =
-				indices->Get(ctx, i + 1).ToLocalChecked()->IntegerValue(ctx).ToChecked();
-			v8::String::Utf8Value normalized(
-				isolate, indices->Get(ctx, i + 2).ToLocalChecked());
-			if (segment_start < 0 || static_cast<int64_t>(segment_start) > nText) {
-				return SQLITE_MISUSE;
-			}
-			if (segment_end < 0 || static_cast<int64_t>(segment_end) > nText) {
-				return SQLITE_MISUSE;
-			}
-
-			int rc = xToken(
-				pCtx, 0, *normalized, normalized.length(),
-				segment_start, segment_end);
-			if (rc != SQLITE_OK) {
-				return rc;
-			}
-		}
-		return SQLITE_OK;
-	}
-
 	static const int MAX_BUFFER_SIZE = node::Buffer::kMaxLength > INT_MAX ? INT_MAX : static_cast<int>(node::Buffer::kMaxLength);
 	static const int MAX_STRING_SIZE = v8::String::kMaxLength > INT_MAX ? INT_MAX : static_cast<int>(v8::String::kMaxLength);
-
-	static fts5_tokenizer js_tokenizer = {
-		.xCreate = &CreateFTSTokenizer,
-		.xDelete = &DeleteFTSTokenizer,
-		.xTokenize = &RunFTSTokenizer,
-	};
 
 	sqlite3* const db_handle;
 	bool open;
@@ -563,7 +500,6 @@ private:
 	unsigned short iterators;
 	Addon* const addon;
 	const CopyablePersistent<v8::Value> logger;
-	const CopyablePersistent<v8::Function> tokenize_fn;
 	std::set<Statement*, CompareStatement> stmts;
 	std::set<Backup*, CompareBackup> backups;
 };
