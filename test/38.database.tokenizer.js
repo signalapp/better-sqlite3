@@ -26,7 +26,8 @@ describe('Database#serialize()', function () {
 				for (const seg of segmenter.segment(str)) {
 					const len = Buffer.byteLength(seg.segment);
 					if (seg.isWordLike) {
-						result.push(off, off + len, removeDiacritics(seg.segment));
+						const normalized = removeDiacritics(seg.segment);
+						result.push(off, off + len, normalized === seg.segment ? undefined : normalized);
 					}
 					off += len;
 				}

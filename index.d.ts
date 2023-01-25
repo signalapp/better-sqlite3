@@ -44,7 +44,7 @@ declare namespace BetterSqlite3 {
     }
 
     interface Tokenizer {
-      run(value: string): ReadonlyArray<number | string>;
+      run(value: string): ReadonlyArray<number | string | undefined>;
     }
 
     interface TokenizerConstructor {

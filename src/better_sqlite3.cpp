@@ -1457,8 +1457,8 @@ int Tokenizer::Run (void * pCtx, char const * pText, int nText, int (* xToken) (
                                 indices->Get(ctx, i).ToLocalChecked()->IntegerValue(ctx).ToChecked();
                         int64_t segment_end =
                                 indices->Get(ctx, i + 1).ToLocalChecked()->IntegerValue(ctx).ToChecked();
-                        v8::String::Utf8Value normalized(
-                                isolate, indices->Get(ctx, i + 2).ToLocalChecked());
+                        v8::Local<v8::Value> maybe_normalized =
+                                indices->Get(ctx, i + 2).ToLocalChecked();
                         if (segment_start < 0 || static_cast<int64_t>(segment_start) > nText) {
                                 return SQLITE_MISUSE;
                         }
@@ -1469,31 +1469,43 @@ int Tokenizer::Run (void * pCtx, char const * pText, int nText, int (* xToken) (
                                 return SQLITE_MISUSE;
                         }
 
-                        int rc = xToken(
-                                pCtx, 0, *normalized, normalized.length(),
-                                segment_start, segment_end);
+                        int rc;
+                        if (maybe_normalized->IsString()) {
+                                v8::String::Utf8Value normalized(
+                                        isolate, indices->Get(ctx, i + 2).ToLocalChecked());
+                                rc = xToken(
+                                        pCtx, 0, *normalized, normalized.length(),
+                                        segment_start, segment_end);
+                        } else {
+
+
+                                rc = xToken(
+                                        pCtx, 0, &pText[segment_start], segment_end - segment_start,
+                                        segment_start, segment_end);
+                        }
+
                         if (rc != SQLITE_OK) {
                                 return rc;
                         }
                 }
                 return SQLITE_OK;
 }
-#line 74 "./src/objects/tokenizer.lzz"
+#line 86 "./src/objects/tokenizer.lzz"
 TokenizerModule::TokenizerModule (v8::Isolate * isolate, v8::Local <v8::Function> create_instance_fn)
-#line 77 "./src/objects/tokenizer.lzz"
+#line 89 "./src/objects/tokenizer.lzz"
   : isolate (isolate), create_instance_fn (isolate, create_instance_fn)
-#line 77 "./src/objects/tokenizer.lzz"
+#line 89 "./src/objects/tokenizer.lzz"
                                                                              {}
-#line 80 "./src/objects/tokenizer.lzz"
+#line 92 "./src/objects/tokenizer.lzz"
 void TokenizerModule::xDestroy (void * pCtx)
-#line 80 "./src/objects/tokenizer.lzz"
+#line 92 "./src/objects/tokenizer.lzz"
                                          {
                 TokenizerModule* m = static_cast<TokenizerModule*>(pCtx);
                 delete m;
 }
-#line 90 "./src/objects/tokenizer.lzz"
+#line 102 "./src/objects/tokenizer.lzz"
 Tokenizer * TokenizerModule::CreateInstance (char const * * azArg, int nArg)
-#line 90 "./src/objects/tokenizer.lzz"
+#line 102 "./src/objects/tokenizer.lzz"
                                                                 {
                 v8::HandleScope scope(isolate);
                 v8 :: Local < v8 :: Context > ctx = isolate -> GetCurrentContext ( ) ;
@@ -1514,30 +1526,30 @@ Tokenizer * TokenizerModule::CreateInstance (char const * * azArg, int nArg)
 
                 return new Tokenizer(isolate, run_fn);
 }
-#line 111 "./src/objects/tokenizer.lzz"
+#line 123 "./src/objects/tokenizer.lzz"
 int TokenizerModule::xCreate (void * pCtx, char const * * azArg, int nArg, Fts5Tokenizer * * ppOut)
-#line 112 "./src/objects/tokenizer.lzz"
+#line 124 "./src/objects/tokenizer.lzz"
                                                                                  {
                 TokenizerModule* m = static_cast<TokenizerModule*>(pCtx);
                 *ppOut = reinterpret_cast<Fts5Tokenizer*>(m->CreateInstance(azArg, nArg));
                 return SQLITE_OK;
 }
-#line 118 "./src/objects/tokenizer.lzz"
+#line 130 "./src/objects/tokenizer.lzz"
 void TokenizerModule::xDelete (Fts5Tokenizer * tokenizer)
-#line 118 "./src/objects/tokenizer.lzz"
+#line 130 "./src/objects/tokenizer.lzz"
                                                       {
                 Tokenizer* t = reinterpret_cast<Tokenizer*>(tokenizer);
                 delete t;
 }
-#line 123 "./src/objects/tokenizer.lzz"
+#line 135 "./src/objects/tokenizer.lzz"
 int TokenizerModule::xTokenize (Fts5Tokenizer * tokenizer, void * pCtx, int flags, char const * pText, int nText, int (* xToken) (void *, int, char const *, int, int, int))
-#line 132 "./src/objects/tokenizer.lzz"
+#line 144 "./src/objects/tokenizer.lzz"
           {
                 Tokenizer* t = reinterpret_cast<Tokenizer*>(tokenizer);
 
                 return t->Run(pCtx, pText, nText, xToken);
 }
-#line 138 "./src/objects/tokenizer.lzz"
+#line 150 "./src/objects/tokenizer.lzz"
 fts5_tokenizer TokenizerModule::api_object = {
                 .xCreate = &xCreate,
                 .xDelete = &xDelete,
