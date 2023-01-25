@@ -7,7 +7,7 @@ const segmenter = new Intl.Segmenter([], {
 
 const DIACRITICS = /[\u0300-\u036f]/g;
 
-function removeDiacritics(str ) {
+function removeDiacritics(str) {
 	return str.normalize('NFD').replace(DIACRITICS, '');
 }
 
