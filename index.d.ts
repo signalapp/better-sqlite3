@@ -44,7 +44,12 @@ declare namespace BetterSqlite3 {
     }
 
     interface Tokenizer {
-      run(value: string): ReadonlyArray<number | string | undefined>;
+      // The resulting array consists of the following triples:
+      // [..., segment_start_idx, segment_end_idx, segment | null, ...]
+      //
+      // `segment` could be `null` or `undefined` if no normalization was
+      // performed or if the string is unchanged after the normalization.
+      run(value: string): ReadonlyArray<number | string | undefined | null>;
     }
 
     interface TokenizerConstructor {
