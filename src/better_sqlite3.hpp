@@ -311,7 +311,7 @@ private:
 #line 409 "./src/objects/database.lzz"
   static void JS_unsafeMode (v8::FunctionCallbackInfo <v8 :: Value> const & info);
 #line 416 "./src/objects/database.lzz"
-  static void JS_createTokenizer (v8::FunctionCallbackInfo <v8 :: Value> const & info);
+  static void JS_createFTS5Tokenizer (v8::FunctionCallbackInfo <v8 :: Value> const & info);
 #line 452 "./src/objects/database.lzz"
   static void JS_open (v8::Local <v8 :: String> _, v8::PropertyCallbackInfo <v8 :: Value> const & info);
 #line 456 "./src/objects/database.lzz"

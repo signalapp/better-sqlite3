@@ -43,7 +43,7 @@ declare namespace BetterSqlite3 {
         type: string | null;
     }
 
-    interface Tokenizer {
+    interface FTS5Tokenizer {
       // The resulting array consists of the following triples:
       // [..., segment_start_idx, segment_end_idx, segment | null, ...]
       //
@@ -52,8 +52,8 @@ declare namespace BetterSqlite3 {
       run(value: string): ReadonlyArray<number | string | undefined | null>;
     }
 
-    interface TokenizerConstructor {
-      new (params: ReadonlyArray<string>): Tokenizer;
+    interface FTS5TokenizerConstructor {
+      new (params: ReadonlyArray<string>): FTS5Tokenizer;
     }
 
     interface Transaction<F extends VariableArgFunction> {
@@ -95,7 +95,7 @@ declare namespace BetterSqlite3 {
         table(name: string, options: VirtualTableOptions): this;
         unsafeMode(unsafe?: boolean): this;
         serialize(options?: Database.SerializeOptions): Buffer;
-        createTokenizer(name: string, tokenizer: TokenizerConstructor): void;
+        createFTS5Tokenizer(name: string, tokenizer: FTS5TokenizerConstructor): void;
     }
 
     interface DatabaseConstructor {
@@ -166,6 +166,7 @@ declare namespace Database {
         : BetterSqlite3.Statement<[BindParameters]>;
     type ColumnDefinition = BetterSqlite3.ColumnDefinition;
     type Transaction<T extends VariableArgFunction = VariableArgFunction> = BetterSqlite3.Transaction<T>;
+    type FTS5Tokenizer = BetterSqlite3.FTS5Tokenizer;
     type Database = BetterSqlite3.Database;
 }
 

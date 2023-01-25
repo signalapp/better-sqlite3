@@ -15,7 +15,7 @@ describe('Database#serialize()', function () {
 	beforeEach(function () {
 		this.db = new Database(':memory:');
 
-		this.db.createTokenizer('js', class Tokenizer {
+		this.db.createFTS5Tokenizer('js', class Tokenizer {
 			constructor(params) {
 				expect(params).to.eql(['arg1', 'arg2']);
 			}

@@ -368,7 +368,7 @@ v8::Local <v8 :: Function> Database::Init (v8::Isolate * isolate, v8::Local <v8 
                 SetPrototypeMethod(isolate, data, t, "close", JS_close);
                 SetPrototypeMethod(isolate, data, t, "defaultSafeIntegers", JS_defaultSafeIntegers);
                 SetPrototypeMethod(isolate, data, t, "unsafeMode", JS_unsafeMode);
-                SetPrototypeMethod(isolate, data, t, "createTokenizer", JS_createTokenizer);
+                SetPrototypeMethod(isolate, data, t, "createFTS5Tokenizer", JS_createFTS5Tokenizer);
                 SetPrototypeGetter(isolate, data, t, "open", JS_open);
                 SetPrototypeGetter(isolate, data, t, "inTransaction", JS_inTransaction);
                 return t->GetFunction( isolate -> GetCurrentContext ( ) ).ToLocalChecked();
@@ -757,9 +757,9 @@ void Database::JS_unsafeMode (v8::FunctionCallbackInfo <v8 :: Value> const & inf
                 sqlite3_db_config(db->db_handle, SQLITE_DBCONFIG_DEFENSIVE, static_cast<int>(!db->unsafe_mode), NULL);
 }
 #line 416 "./src/objects/database.lzz"
-void Database::JS_createTokenizer (v8::FunctionCallbackInfo <v8 :: Value> const & info)
+void Database::JS_createFTS5Tokenizer (v8::FunctionCallbackInfo <v8 :: Value> const & info)
 #line 416 "./src/objects/database.lzz"
-                                        {
+                                            {
                 Addon * addon = static_cast < Addon * > ( info . Data ( ) . As < v8 :: External > ( ) -> Value ( ) ) ;
                 v8 :: Isolate * isolate = info . GetIsolate ( ) ;
 
@@ -1551,9 +1551,9 @@ int TokenizerModule::xTokenize (Fts5Tokenizer * tokenizer, void * pCtx, int flag
 }
 #line 150 "./src/objects/tokenizer.lzz"
 fts5_tokenizer TokenizerModule::api_object = {
-                .xCreate = &xCreate,
-                .xDelete = &xDelete,
-                .xTokenize = &xTokenize,
+                &xCreate,
+                &xDelete,
+                &xTokenize,
         };
 #line 4 "./src/util/data-converter.lzz"
 void DataConverter::ThrowDataConversionError (sqlite3_context * invocation, bool isBigInt)

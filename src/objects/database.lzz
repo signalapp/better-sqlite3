@@ -14,7 +14,7 @@ public:
 		SetPrototypeMethod(isolate, data, t, "close", JS_close);
 		SetPrototypeMethod(isolate, data, t, "defaultSafeIntegers", JS_defaultSafeIntegers);
 		SetPrototypeMethod(isolate, data, t, "unsafeMode", JS_unsafeMode);
-		SetPrototypeMethod(isolate, data, t, "createTokenizer", JS_createTokenizer);
+		SetPrototypeMethod(isolate, data, t, "createFTS5Tokenizer", JS_createFTS5Tokenizer);
 		SetPrototypeGetter(isolate, data, t, "open", JS_open);
 		SetPrototypeGetter(isolate, data, t, "inTransaction", JS_inTransaction);
 		return t->GetFunction(OnlyContext).ToLocalChecked();
@@ -413,7 +413,7 @@ private:
 		sqlite3_db_config(db->db_handle, SQLITE_DBCONFIG_DEFENSIVE, static_cast<int>(!db->unsafe_mode), NULL);
 	}
 
-	NODE_METHOD(JS_createTokenizer) {
+	NODE_METHOD(JS_createFTS5Tokenizer) {
 		UseAddon;
 		UseIsolate;
 

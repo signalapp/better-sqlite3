@@ -148,9 +148,9 @@ private:
 	}
 
 	static fts5_tokenizer api_object = {
-		.xCreate = &xCreate,
-		.xDelete = &xDelete,
-		.xTokenize = &xTokenize,
+		&xCreate,
+		&xDelete,
+		&xTokenize,
 	};
 
 	v8::Isolate* isolate;
