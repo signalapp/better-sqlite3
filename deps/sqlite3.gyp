@@ -23,10 +23,10 @@
         'conditions': [
           ['OS == "win"', {
             'outputs': [
-              '<(SHARED_INTERMEDIATE_DIR)/sqlite3/fts5-tokenizer/>(rust_arch)-pc-windows-msvc/fts5_tokenizer.lib',
               '<(SHARED_INTERMEDIATE_DIR)/sqlite3/>(openssl_root)/libssl.lib',
               '<(SHARED_INTERMEDIATE_DIR)/sqlite3/>(openssl_root)/libcrypto.lib',
               '<(SHARED_INTERMEDIATE_DIR)/sqlite3/>(openssl_root)/ossl_static.pdb',
+              '<(SHARED_INTERMEDIATE_DIR)/sqlite3/fts5-tokenizer/>(rust_arch)-pc-windows-msvc/fts5_tokenizer.lib',
             ],
           }],
         ],
@@ -44,6 +44,7 @@
               '<(SHARED_INTERMEDIATE_DIR)/sqlite3/>(openssl_root)/libssl.lib',
               '<(SHARED_INTERMEDIATE_DIR)/sqlite3/>(openssl_root)/libcrypto.lib',
               '<(SHARED_INTERMEDIATE_DIR)/sqlite3/>(openssl_root)/ossl_static.pdb',
+              '<(SHARED_INTERMEDIATE_DIR)/sqlite3/fts5-tokenizer/>(rust_arch)-pc-windows-msvc/fts5_tokenizer.lib',
             ],
             'destination': '<(PRODUCT_DIR)',
           }],
