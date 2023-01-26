@@ -15,7 +15,7 @@ describe('Database#serialize()', function () {
 	beforeEach(function () {
 		this.db = new Database(':memory:');
 
-		this.db.prepare("CREATE VIRTUAL TABLE fts USING fts5(content, tokenize='icu_tokenizer')").run();
+		this.db.prepare("CREATE VIRTUAL TABLE fts USING fts5(content, tokenize='signal_tokenizer')").run();
 		this.insertStmt = this.db.prepare("INSERT INTO fts (content) VALUES (?)");
 		this.lookupStmt = this.db.prepare(
 			"SELECT snippet(fts, -1, '[', ']', '...', 20) " +

@@ -550,9 +550,9 @@ void Database::JS_new (v8::FunctionCallbackInfo <v8 :: Value> const & info)
                 if (fts5 == nullptr) {
                         return;
                 }
-                ICUTokenizerModule* icu = new ICUTokenizerModule();
-                fts5->xCreateTokenizer(fts5, "icu_tokenizer", icu, icu->get_api_object(),
-                        &ICUTokenizerModule::xDestroy);
+                SignalTokenizerModule* icu = new SignalTokenizerModule();
+                fts5->xCreateTokenizer(fts5, "signal_tokenizer", icu, icu->get_api_object(),
+                        &SignalTokenizerModule::xDestroy);
 
                 info.GetReturnValue().Set(info.This());
 }
@@ -1574,31 +1574,31 @@ fts5_tokenizer TokenizerModule::api_object = {
                 &xDelete,
                 &xTokenize,
         };
-#line 3 "./src/objects/icu-tokenizer.lzz"
-ICUTokenizerModule::ICUTokenizerModule ()
-#line 3 "./src/objects/icu-tokenizer.lzz"
-                             {}
-#line 5 "./src/objects/icu-tokenizer.lzz"
-void ICUTokenizerModule::xDestroy (void * pCtx)
-#line 5 "./src/objects/icu-tokenizer.lzz"
+#line 3 "./src/objects/signal-tokenizer.lzz"
+SignalTokenizerModule::SignalTokenizerModule ()
+#line 3 "./src/objects/signal-tokenizer.lzz"
+                                {}
+#line 5 "./src/objects/signal-tokenizer.lzz"
+void SignalTokenizerModule::xDestroy (void * pCtx)
+#line 5 "./src/objects/signal-tokenizer.lzz"
                                          {}
-#line 14 "./src/objects/icu-tokenizer.lzz"
-int ICUTokenizerModule::xCreate (void * pCtx, char const * * azArg, int nArg, Fts5Tokenizer * * ppOut)
-#line 15 "./src/objects/icu-tokenizer.lzz"
+#line 14 "./src/objects/signal-tokenizer.lzz"
+int SignalTokenizerModule::xCreate (void * pCtx, char const * * azArg, int nArg, Fts5Tokenizer * * ppOut)
+#line 15 "./src/objects/signal-tokenizer.lzz"
                                                                                  {
                 TokenizerModule* m = static_cast<TokenizerModule*>(pCtx);
                 *ppOut = reinterpret_cast<Fts5Tokenizer*>(m);
                 return SQLITE_OK;
 }
-#line 21 "./src/objects/icu-tokenizer.lzz"
-void ICUTokenizerModule::xDelete (Fts5Tokenizer * tokenizer)
-#line 21 "./src/objects/icu-tokenizer.lzz"
+#line 21 "./src/objects/signal-tokenizer.lzz"
+void SignalTokenizerModule::xDelete (Fts5Tokenizer * tokenizer)
+#line 21 "./src/objects/signal-tokenizer.lzz"
                                                       {}
-#line 25 "./src/objects/icu-tokenizer.lzz"
-fts5_tokenizer ICUTokenizerModule::api_object = {
+#line 25 "./src/objects/signal-tokenizer.lzz"
+fts5_tokenizer SignalTokenizerModule::api_object = {
                 &xCreate,
                 &xDelete,
-                fts5_icu_tokenize,
+                signal_fts5_tokenize,
         };
 #line 4 "./src/util/data-converter.lzz"
 void DataConverter::ThrowDataConversionError (sqlite3_context * invocation, bool isBigInt)

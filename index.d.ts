@@ -88,7 +88,7 @@ declare namespace BetterSqlite3 {
         function(name: string, cb: (...params: any[]) => any): this;
         function(name: string, options: Database.RegistrationOptions, cb: (...params: any[]) => any): this;
         aggregate(name: string, options: Database.AggregateOptions): this;
-        loadExtension(path: string): this;
+        loadExtension(path: string, entryPoint?: string): this;
         close(): this;
         defaultSafeIntegers(toggleState?: boolean): this;
         backup(destinationFile: string, options?: Database.BackupOptions): Promise<Database.BackupMetadata>;

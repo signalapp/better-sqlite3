@@ -11,7 +11,7 @@
 #include <node.h>
 #include <node_buffer.h>
 #include <uv.h>
-#include "fts5-tokenizer.h"
+#include "signal-tokenizer.h"
 #end
 
 #insert "util/object_wrap.lzz"
@@ -22,14 +22,14 @@
 struct Addon;
 class Statement;
 class TokenizerModule;
-class ICUTokenizerModule;
+class SignalTokenizerModule;
 class Backup;
 #insert "objects/database.lzz"
 #insert "objects/statement.lzz"
 #insert "objects/statement-iterator.lzz"
 #insert "objects/backup.lzz"
 #insert "objects/tokenizer.lzz"
-#insert "objects/icu-tokenizer.lzz"
+#insert "objects/signal-tokenizer.lzz"
 #insert "util/data-converter.lzz"
 #insert "util/custom-function.lzz"
 #insert "util/custom-aggregate.lzz"

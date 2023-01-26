@@ -25,7 +25,7 @@
             'outputs': [
               '<(SHARED_INTERMEDIATE_DIR)/sqlite3/>(openssl_root)/libssl.lib',
               '<(SHARED_INTERMEDIATE_DIR)/sqlite3/>(openssl_root)/libcrypto.lib',
-              '<(SHARED_INTERMEDIATE_DIR)/sqlite3/fts5-tokenizer/>(rust_arch)-pc-windows-msvc/fts5_tokenizer.lib',
+              '<(SHARED_INTERMEDIATE_DIR)/sqlite3/signal-tokenizer/>(rust_arch)-pc-windows-msvc/signal_tokenizer.lib',
             ],
           }],
         ],
@@ -42,7 +42,7 @@
             'files': [
               '<(SHARED_INTERMEDIATE_DIR)/sqlite3/>(openssl_root)/libssl.lib',
               '<(SHARED_INTERMEDIATE_DIR)/sqlite3/>(openssl_root)/libcrypto.lib',
-              '<(SHARED_INTERMEDIATE_DIR)/sqlite3/fts5-tokenizer/>(rust_arch)-pc-windows-msvc/fts5_tokenizer.lib',
+              '<(SHARED_INTERMEDIATE_DIR)/sqlite3/signal-tokenizer/>(rust_arch)-pc-windows-msvc/signal_tokenizer.lib',
             ],
             'destination': '<(PRODUCT_DIR)',
           }],
@@ -62,7 +62,7 @@
         'include_dirs': [
           '<(SHARED_INTERMEDIATE_DIR)/sqlite3/',
           '<(SHARED_INTERMEDIATE_DIR)/sqlite3/openssl-include',
-          '<(SHARED_INTERMEDIATE_DIR)/sqlite3/fts5-tokenizer/include',
+          '<(SHARED_INTERMEDIATE_DIR)/sqlite3/signal-tokenizer/include',
         ],
       },
       'cflags': ['-std=c99', '-w'],
@@ -82,7 +82,7 @@
               '-llibssl.lib',
               '-lws2_32.lib',
               '-lcrypt32.lib',
-              '-lfts5_tokenizer.lib',
+              '-lsignal_tokenizer.lib',
             ],
             'library_dirs': [
               '<(PRODUCT_DIR)',
@@ -94,7 +94,7 @@
             'libraries': [
               # This statically links libcrypto, whereas -lcrypto would dynamically link it
               '<(SHARED_INTERMEDIATE_DIR)/sqlite3/OpenSSL-mac-<(target_arch)/libcrypto.a',
-              '<(SHARED_INTERMEDIATE_DIR)/sqlite3/fts5-tokenizer/>(rust_arch)-apple-darwin/libfts5_tokenizer.a',
+              '<(SHARED_INTERMEDIATE_DIR)/sqlite3/signal-tokenizer/>(rust_arch)-apple-darwin/libsignal_tokenizer.a',
             ]
           }
         },
@@ -103,7 +103,7 @@
             'libraries': [
               # This statically links libcrypto, whereas -lcrypto would dynamically link it
               '<(SHARED_INTERMEDIATE_DIR)/sqlite3/OpenSSL-linux-<(target_arch)/libcrypto.a',
-              '<(SHARED_INTERMEDIATE_DIR)/sqlite3/fts5-tokenizer/>(rust_arch)-unknown-linux-gnu/libfts5_tokenizer.a',
+              '<(SHARED_INTERMEDIATE_DIR)/sqlite3/signal-tokenizer/>(rust_arch)-unknown-linux-gnu/libsignal_tokenizer.a',
             ]
           }
         }],

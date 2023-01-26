@@ -1,6 +1,6 @@
-class ICUTokenizerModule {
+class SignalTokenizerModule {
 public:
-	ICUTokenizerModule() {}
+	SignalTokenizerModule() {}
 
 	static void xDestroy(void* pCtx) {
 		// No-op
@@ -25,6 +25,6 @@ private:
 	static fts5_tokenizer api_object = {
 		&xCreate,
 		&xDelete,
-		fts5_icu_tokenize,
+		signal_fts5_tokenize,
 	};
 };

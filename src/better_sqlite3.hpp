@@ -16,7 +16,7 @@
 #include <node.h>
 #include <node_buffer.h>
 #include <uv.h>
-#include "fts5-tokenizer.h"
+#include "signal-tokenizer.h"
 #line 31 "./src/util/macros.lzz"
 template <class T> using CopyablePersistent = v8::Persistent<T, v8::CopyablePersistentTraits<T>>;
 #line 36 "./src/util/binder.lzz"
@@ -205,7 +205,7 @@ class Statement;
 #line 24 "./src/better_sqlite3.lzz"
 class TokenizerModule;
 #line 25 "./src/better_sqlite3.lzz"
-class ICUTokenizerModule;
+class SignalTokenizerModule;
 #line 26 "./src/better_sqlite3.lzz"
 class Backup;
 #line 1 "./src/objects/database.lzz"
@@ -564,24 +564,24 @@ private:
 #line 157 "./src/objects/tokenizer.lzz"
   CopyablePersistent <v8::Function> const create_instance_fn;
 };
-#line 1 "./src/objects/icu-tokenizer.lzz"
-class ICUTokenizerModule
+#line 1 "./src/objects/signal-tokenizer.lzz"
+class SignalTokenizerModule
 {
-#line 2 "./src/objects/icu-tokenizer.lzz"
+#line 2 "./src/objects/signal-tokenizer.lzz"
 public:
-#line 3 "./src/objects/icu-tokenizer.lzz"
-  ICUTokenizerModule ();
-#line 5 "./src/objects/icu-tokenizer.lzz"
+#line 3 "./src/objects/signal-tokenizer.lzz"
+  SignalTokenizerModule ();
+#line 5 "./src/objects/signal-tokenizer.lzz"
   static void xDestroy (void * pCtx);
-#line 9 "./src/objects/icu-tokenizer.lzz"
+#line 9 "./src/objects/signal-tokenizer.lzz"
   fts5_tokenizer * get_api_object ();
-#line 13 "./src/objects/icu-tokenizer.lzz"
+#line 13 "./src/objects/signal-tokenizer.lzz"
 private:
-#line 14 "./src/objects/icu-tokenizer.lzz"
+#line 14 "./src/objects/signal-tokenizer.lzz"
   static int xCreate (void * pCtx, char const * * azArg, int nArg, Fts5Tokenizer * * ppOut);
-#line 21 "./src/objects/icu-tokenizer.lzz"
+#line 21 "./src/objects/signal-tokenizer.lzz"
   static void xDelete (Fts5Tokenizer * tokenizer);
-#line 25 "./src/objects/icu-tokenizer.lzz"
+#line 25 "./src/objects/signal-tokenizer.lzz"
   static fts5_tokenizer api_object;
 };
 #line 1 "./src/util/data-converter.lzz"
@@ -1129,9 +1129,9 @@ LZZ_INLINE fts5_tokenizer * TokenizerModule::get_api_object ()
                                                 {
                 return &api_object;
 }
-#line 9 "./src/objects/icu-tokenizer.lzz"
-LZZ_INLINE fts5_tokenizer * ICUTokenizerModule::get_api_object ()
-#line 9 "./src/objects/icu-tokenizer.lzz"
+#line 9 "./src/objects/signal-tokenizer.lzz"
+LZZ_INLINE fts5_tokenizer * SignalTokenizerModule::get_api_object ()
+#line 9 "./src/objects/signal-tokenizer.lzz"
                                                 {
                 return &api_object;
 }

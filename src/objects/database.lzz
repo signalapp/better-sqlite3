@@ -226,9 +226,9 @@ private:
 		if (fts5 == nullptr) {
 			return;
 		}
-		ICUTokenizerModule* icu = new ICUTokenizerModule();
-		fts5->xCreateTokenizer(fts5, "icu_tokenizer", icu, icu->get_api_object(),
-			&ICUTokenizerModule::xDestroy);
+		SignalTokenizerModule* icu = new SignalTokenizerModule();
+		fts5->xCreateTokenizer(fts5, "signal_tokenizer", icu, icu->get_api_object(),
+			&SignalTokenizerModule::xDestroy);
 
 		info.GetReturnValue().Set(info.This());
 	}
