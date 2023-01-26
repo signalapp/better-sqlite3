@@ -147,6 +147,30 @@ private:
 		addon->dbs.insert(this);
 	}
 
+	fts5_api* GetFTS5API() {
+		// Get fts5_api object
+		int rc;
+		sqlite3_stmt *pStmt = nullptr;
+
+		rc = sqlite3_prepare(db_handle, "SELECT fts5(?1)", -1, &pStmt, 0);
+		if (rc != SQLITE_OK) {
+			ThrowSqliteError(addon, db_handle);
+			return nullptr;
+		}
+
+		fts5_api *fts5 = nullptr;
+		sqlite3_bind_pointer(pStmt, 1, (void*)&fts5, "fts5_api_ptr", nullptr);
+		sqlite3_step(pStmt);
+		rc = sqlite3_finalize(pStmt);
+		if (rc != SQLITE_OK) {
+			ThrowSqliteError(addon, db_handle);
+			return nullptr;
+		}
+
+		assert(fts5 != nullptr);
+		return fts5;
+	}
+
 	NODE_METHOD(JS_new) {
 		assert(info.IsConstructCall());
 		REQUIRE_ARGUMENT_STRING(first, v8::Local<v8::String> filename);
@@ -195,6 +219,16 @@ private:
 		SetFrozen(isolate, ctx, info.This(), addon->cs.memory, v8::Boolean::New(isolate, in_memory));
 		SetFrozen(isolate, ctx, info.This(), addon->cs.readonly, v8::Boolean::New(isolate, readonly));
 		SetFrozen(isolate, ctx, info.This(), addon->cs.name, filenameGiven);
+
+		// Add ICU tokenizer
+		fts5_api* fts5 = db->GetFTS5API();
+		// Already threw an exception
+		if (fts5 == nullptr) {
+			return;
+		}
+		ICUTokenizerModule* icu = new ICUTokenizerModule();
+		fts5->xCreateTokenizer(fts5, "icu_tokenizer", icu, icu->get_api_object(),
+			&ICUTokenizerModule::xDestroy);
 
 		info.GetReturnValue().Set(info.This());
 	}
@@ -414,37 +448,20 @@ private:
 	}
 
 	NODE_METHOD(JS_createFTS5Tokenizer) {
-		UseAddon;
 		UseIsolate;
 
 		Database* db = Unwrap<Database>(info.This());
 		REQUIRE_ARGUMENT_STRING(first, v8::Local<v8::String> name);
 		REQUIRE_ARGUMENT_FUNCTION(second, v8::Local<v8::Function> create_instance_fn);
 
-		// Get fts5_api object
-		int rc;
-		sqlite3_stmt *pStmt = nullptr;
-
-		rc = sqlite3_prepare(db->db_handle, "SELECT fts5(?1)", -1, &pStmt, 0);
-		if (rc != SQLITE_OK) {
-			ThrowSqliteError(addon, db->db_handle);
-			return;
-		}
-
-		fts5_api *fts5 = nullptr;
-		sqlite3_bind_pointer(pStmt, 1, (void*)&fts5, "fts5_api_ptr", nullptr);
-		sqlite3_step(pStmt);
-		rc = sqlite3_finalize(pStmt);
-		if (rc != SQLITE_OK) {
-			ThrowSqliteError(addon, db->db_handle);
-			return;
-		}
-
-		assert(fts5 != nullptr);
-
 		TokenizerModule* t = new TokenizerModule(isolate, create_instance_fn);
 
 		v8::String::Utf8Value utf8(isolate, name);
+		fts5_api* fts5 = db->GetFTS5API();
+		// Already threw an exception
+		if (fts5 == nullptr) {
+			return;
+		}
 		fts5->xCreateTokenizer(fts5, *utf8, t, t->get_api_object(),
 			&TokenizerModule::xDestroy);
 	}

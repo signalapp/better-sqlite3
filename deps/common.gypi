@@ -13,6 +13,15 @@
       },
     },
     'conditions': [
+      ['target_arch == "x64"', {
+        'variables': {
+          'rust_arch%': 'x86_64',
+        }
+      }, {
+        'variables': {
+          'rust_arch%': 'aarch64',
+        }
+      }],
       ['OS == "win"', {
         'defines': ['WIN32'],
         'variables': {

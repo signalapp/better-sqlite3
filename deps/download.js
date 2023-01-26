@@ -6,7 +6,7 @@ const { Transform } = require('stream');
 const { pipeline } = require('stream/promises');
 
 const BASE_URI = `https://build-artifacts.signal.org/desktop`;
-const HASH = '4587e88a4219cb76fd595a5b73f82bfd919b235d75626f40783525f4f58a7503';
+const HASH = '01d2f46ae275286ed552cfc977239e7dba1ca2cd572f1d0c057a29d87b1f9c79';
 const SQLCIPHER_VERSION = '4.5.2';
 const OPENSSL_VERSION = '3.0.7';
 const URL = `${BASE_URI}/sqlcipher-${SQLCIPHER_VERSION}--${OPENSSL_VERSION}-` +

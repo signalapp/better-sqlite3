@@ -16,6 +16,7 @@
 #include <node.h>
 #include <node_buffer.h>
 #include <uv.h>
+#include "fts5-tokenizer.h"
 #line 31 "./src/util/macros.lzz"
 template <class T> using CopyablePersistent = v8::Persistent<T, v8::CopyablePersistentTraits<T>>;
 #line 36 "./src/util/binder.lzz"
@@ -197,13 +198,15 @@ private:
 #line 72 "./src/util/bind-map.lzz"
   int length;
 };
-#line 21 "./src/better_sqlite3.lzz"
-struct Addon;
 #line 22 "./src/better_sqlite3.lzz"
-class Statement;
+struct Addon;
 #line 23 "./src/better_sqlite3.lzz"
-class TokenizerModule;
+class Statement;
 #line 24 "./src/better_sqlite3.lzz"
+class TokenizerModule;
+#line 25 "./src/better_sqlite3.lzz"
+class ICUTokenizerModule;
+#line 26 "./src/better_sqlite3.lzz"
 class Backup;
 #line 1 "./src/objects/database.lzz"
 class Database : public ObjectWrapForElectron22
@@ -287,66 +290,68 @@ private:
 #line 127 "./src/objects/database.lzz"
   explicit Database (v8::Isolate * isolate, Addon * addon, sqlite3 * db_handle, v8::Local <v8::Value> logger);
 #line 150 "./src/objects/database.lzz"
+  fts5_api * GetFTS5API ();
+#line 174 "./src/objects/database.lzz"
   static void JS_new (v8::FunctionCallbackInfo <v8 :: Value> const & info);
-#line 202 "./src/objects/database.lzz"
+#line 236 "./src/objects/database.lzz"
   static void JS_prepare (v8::FunctionCallbackInfo <v8 :: Value> const & info);
-#line 218 "./src/objects/database.lzz"
+#line 252 "./src/objects/database.lzz"
   static void JS_exec (v8::FunctionCallbackInfo <v8 :: Value> const & info);
-#line 258 "./src/objects/database.lzz"
+#line 292 "./src/objects/database.lzz"
   static void JS_backup (v8::FunctionCallbackInfo <v8 :: Value> const & info);
-#line 276 "./src/objects/database.lzz"
+#line 310 "./src/objects/database.lzz"
   static void JS_serialize (v8::FunctionCallbackInfo <v8 :: Value> const & info);
-#line 298 "./src/objects/database.lzz"
+#line 332 "./src/objects/database.lzz"
   static void JS_function (v8::FunctionCallbackInfo <v8 :: Value> const & info);
-#line 322 "./src/objects/database.lzz"
+#line 356 "./src/objects/database.lzz"
   static void JS_aggregate (v8::FunctionCallbackInfo <v8 :: Value> const & info);
-#line 351 "./src/objects/database.lzz"
+#line 385 "./src/objects/database.lzz"
   static void JS_table (v8::FunctionCallbackInfo <v8 :: Value> const & info);
-#line 371 "./src/objects/database.lzz"
+#line 405 "./src/objects/database.lzz"
   static void JS_loadExtension (v8::FunctionCallbackInfo <v8 :: Value> const & info);
-#line 393 "./src/objects/database.lzz"
+#line 427 "./src/objects/database.lzz"
   static void JS_close (v8::FunctionCallbackInfo <v8 :: Value> const & info);
-#line 403 "./src/objects/database.lzz"
+#line 437 "./src/objects/database.lzz"
   static void JS_defaultSafeIntegers (v8::FunctionCallbackInfo <v8 :: Value> const & info);
-#line 409 "./src/objects/database.lzz"
+#line 443 "./src/objects/database.lzz"
   static void JS_unsafeMode (v8::FunctionCallbackInfo <v8 :: Value> const & info);
-#line 416 "./src/objects/database.lzz"
+#line 450 "./src/objects/database.lzz"
   static void JS_createFTS5Tokenizer (v8::FunctionCallbackInfo <v8 :: Value> const & info);
-#line 452 "./src/objects/database.lzz"
+#line 469 "./src/objects/database.lzz"
   static void JS_open (v8::Local <v8 :: String> _, v8::PropertyCallbackInfo <v8 :: Value> const & info);
-#line 456 "./src/objects/database.lzz"
+#line 473 "./src/objects/database.lzz"
   static void JS_inTransaction (v8::Local <v8 :: String> _, v8::PropertyCallbackInfo <v8 :: Value> const & info);
-#line 461 "./src/objects/database.lzz"
+#line 478 "./src/objects/database.lzz"
   static bool Deserialize (v8::Local <v8::Object> buffer, Addon * addon, sqlite3 * db_handle, bool readonly);
-#line 486 "./src/objects/database.lzz"
-  static void FreeSerialization (char * data, void * _);
-#line 490 "./src/objects/database.lzz"
-  static int const MAX_BUFFER_SIZE = node::Buffer::kMaxLength > INT_MAX ? INT_MAX : static_cast<int>(node::Buffer::kMaxLength);
-#line 491 "./src/objects/database.lzz"
-  static int const MAX_STRING_SIZE = v8::String::kMaxLength > INT_MAX ? INT_MAX : static_cast<int>(v8::String::kMaxLength);
-#line 493 "./src/objects/database.lzz"
-  sqlite3 * const db_handle;
-#line 494 "./src/objects/database.lzz"
-  bool open;
-#line 495 "./src/objects/database.lzz"
-  bool busy;
-#line 496 "./src/objects/database.lzz"
-  bool safe_ints;
-#line 497 "./src/objects/database.lzz"
-  bool unsafe_mode;
-#line 498 "./src/objects/database.lzz"
-  bool was_js_error;
-#line 499 "./src/objects/database.lzz"
-  bool const has_logger;
-#line 500 "./src/objects/database.lzz"
-  unsigned short int iterators;
-#line 501 "./src/objects/database.lzz"
-  Addon * const addon;
-#line 502 "./src/objects/database.lzz"
-  CopyablePersistent <v8::Value> const logger;
 #line 503 "./src/objects/database.lzz"
+  static void FreeSerialization (char * data, void * _);
+#line 507 "./src/objects/database.lzz"
+  static int const MAX_BUFFER_SIZE = node::Buffer::kMaxLength > INT_MAX ? INT_MAX : static_cast<int>(node::Buffer::kMaxLength);
+#line 508 "./src/objects/database.lzz"
+  static int const MAX_STRING_SIZE = v8::String::kMaxLength > INT_MAX ? INT_MAX : static_cast<int>(v8::String::kMaxLength);
+#line 510 "./src/objects/database.lzz"
+  sqlite3 * const db_handle;
+#line 511 "./src/objects/database.lzz"
+  bool open;
+#line 512 "./src/objects/database.lzz"
+  bool busy;
+#line 513 "./src/objects/database.lzz"
+  bool safe_ints;
+#line 514 "./src/objects/database.lzz"
+  bool unsafe_mode;
+#line 515 "./src/objects/database.lzz"
+  bool was_js_error;
+#line 516 "./src/objects/database.lzz"
+  bool const has_logger;
+#line 517 "./src/objects/database.lzz"
+  unsigned short int iterators;
+#line 518 "./src/objects/database.lzz"
+  Addon * const addon;
+#line 519 "./src/objects/database.lzz"
+  CopyablePersistent <v8::Value> const logger;
+#line 520 "./src/objects/database.lzz"
   std::set <Statement*, CompareStatement> stmts;
-#line 504 "./src/objects/database.lzz"
+#line 521 "./src/objects/database.lzz"
   std::set <Backup*, CompareBackup> backups;
 };
 #line 1 "./src/objects/statement.lzz"
@@ -558,6 +563,26 @@ private:
   v8::Isolate * isolate;
 #line 157 "./src/objects/tokenizer.lzz"
   CopyablePersistent <v8::Function> const create_instance_fn;
+};
+#line 1 "./src/objects/icu-tokenizer.lzz"
+class ICUTokenizerModule
+{
+#line 2 "./src/objects/icu-tokenizer.lzz"
+public:
+#line 3 "./src/objects/icu-tokenizer.lzz"
+  ICUTokenizerModule ();
+#line 5 "./src/objects/icu-tokenizer.lzz"
+  static void xDestroy (void * pCtx);
+#line 9 "./src/objects/icu-tokenizer.lzz"
+  fts5_tokenizer * get_api_object ();
+#line 13 "./src/objects/icu-tokenizer.lzz"
+private:
+#line 14 "./src/objects/icu-tokenizer.lzz"
+  static int xCreate (void * pCtx, char const * * azArg, int nArg, Fts5Tokenizer * * ppOut);
+#line 21 "./src/objects/icu-tokenizer.lzz"
+  static void xDelete (Fts5Tokenizer * tokenizer);
+#line 25 "./src/objects/icu-tokenizer.lzz"
+  static fts5_tokenizer api_object;
 };
 #line 1 "./src/util/data-converter.lzz"
 class DataConverter
@@ -865,42 +890,42 @@ private:
 #line 203 "./src/util/binder.lzz"
   bool success;
 };
-#line 37 "./src/better_sqlite3.lzz"
+#line 40 "./src/better_sqlite3.lzz"
 struct Addon
 {
-#line 38 "./src/better_sqlite3.lzz"
+#line 41 "./src/better_sqlite3.lzz"
   static void JS_setErrorConstructor (v8::FunctionCallbackInfo <v8 :: Value> const & info);
-#line 43 "./src/better_sqlite3.lzz"
+#line 46 "./src/better_sqlite3.lzz"
   static void JS_setLogHandler (v8::FunctionCallbackInfo <v8 :: Value> const & info);
-#line 48 "./src/better_sqlite3.lzz"
+#line 51 "./src/better_sqlite3.lzz"
   static void Cleanup (void * ptr);
-#line 55 "./src/better_sqlite3.lzz"
+#line 58 "./src/better_sqlite3.lzz"
   static void SqliteLog (void * pArg, int iErrCode, char const * zMsg);
-#line 70 "./src/better_sqlite3.lzz"
+#line 73 "./src/better_sqlite3.lzz"
   static void InitLoggerOnce ();
-#line 79 "./src/better_sqlite3.lzz"
+#line 82 "./src/better_sqlite3.lzz"
   explicit Addon (v8::Isolate * isolate);
-#line 88 "./src/better_sqlite3.lzz"
+#line 91 "./src/better_sqlite3.lzz"
   sqlite3_uint64 NextId ();
-#line 92 "./src/better_sqlite3.lzz"
-  CopyablePersistent <v8::Function> Statement;
-#line 93 "./src/better_sqlite3.lzz"
-  CopyablePersistent <v8::Function> StatementIterator;
-#line 94 "./src/better_sqlite3.lzz"
-  CopyablePersistent <v8::Function> Backup;
 #line 95 "./src/better_sqlite3.lzz"
-  CopyablePersistent <v8::Function> SqliteError;
+  CopyablePersistent <v8::Function> Statement;
 #line 96 "./src/better_sqlite3.lzz"
-  CopyablePersistent <v8::Function> LogHandler;
+  CopyablePersistent <v8::Function> StatementIterator;
 #line 97 "./src/better_sqlite3.lzz"
-  v8::FunctionCallbackInfo <v8 :: Value> const * privileged_info;
+  CopyablePersistent <v8::Function> Backup;
 #line 98 "./src/better_sqlite3.lzz"
-  sqlite3_uint64 next_id;
+  CopyablePersistent <v8::Function> SqliteError;
 #line 99 "./src/better_sqlite3.lzz"
-  CS cs;
+  CopyablePersistent <v8::Function> LogHandler;
 #line 100 "./src/better_sqlite3.lzz"
-  std::set <Database*, Database::CompareDatabase> dbs;
+  v8::FunctionCallbackInfo <v8 :: Value> const * privileged_info;
 #line 101 "./src/better_sqlite3.lzz"
+  sqlite3_uint64 next_id;
+#line 102 "./src/better_sqlite3.lzz"
+  CS cs;
+#line 103 "./src/better_sqlite3.lzz"
+  std::set <Database*, Database::CompareDatabase> dbs;
+#line 104 "./src/better_sqlite3.lzz"
   static uv_key_t thread_key;
 };
 #line 47 "./src/util/object_wrap.lzz"
@@ -1104,6 +1129,12 @@ LZZ_INLINE fts5_tokenizer * TokenizerModule::get_api_object ()
                                                 {
                 return &api_object;
 }
+#line 9 "./src/objects/icu-tokenizer.lzz"
+LZZ_INLINE fts5_tokenizer * ICUTokenizerModule::get_api_object ()
+#line 9 "./src/objects/icu-tokenizer.lzz"
+                                                {
+                return &api_object;
+}
 #line 39 "./src/util/custom-aggregate.lzz"
 LZZ_INLINE void CustomAggregate::xStepBase (sqlite3_context * invocation, int argc, sqlite3_value * * argv, CopyablePersistent <v8::Function> const CustomAggregate::* ptrtm)
 #line 39 "./src/util/custom-aggregate.lzz"
@@ -1181,9 +1212,9 @@ LZZ_INLINE CustomTable::VTab * CustomTable::Cursor::GetVTab ()
                                                     {
                         return VTab::Upcast(base.pVtab);
 }
-#line 88 "./src/better_sqlite3.lzz"
+#line 91 "./src/better_sqlite3.lzz"
 LZZ_INLINE sqlite3_uint64 Addon::NextId ()
-#line 88 "./src/better_sqlite3.lzz"
+#line 91 "./src/better_sqlite3.lzz"
                                        {
                 return next_id++;
 }

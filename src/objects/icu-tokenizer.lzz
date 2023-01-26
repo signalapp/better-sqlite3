@@ -1,0 +1,30 @@
+class ICUTokenizerModule {
+public:
+	ICUTokenizerModule() {}
+
+	static void xDestroy(void* pCtx) {
+		// No-op
+	}
+
+	inline fts5_tokenizer* get_api_object() {
+		return &api_object;
+	}
+
+private:
+	static int xCreate(
+		void* pCtx, const char** azArg, int nArg, Fts5Tokenizer** ppOut) {
+		TokenizerModule* m = static_cast<TokenizerModule*>(pCtx);
+		*ppOut = reinterpret_cast<Fts5Tokenizer*>(m);
+		return SQLITE_OK;
+	}
+
+	static void xDelete(Fts5Tokenizer* tokenizer) {
+		// No-op
+	}
+
+	static fts5_tokenizer api_object = {
+		&xCreate,
+		&xDelete,
+		fts5_icu_tokenize,
+	};
+};
