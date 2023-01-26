@@ -104,7 +104,7 @@
           'link_settings': {
             'libraries': [
               # This statically links libcrypto, whereas -lcrypto would dynamically link it
-              '<(SHARED_INTERMEDIATE_DIR)/sqlite3/OpenSSL-linux-<(target_arch)/libcrypto.a'
+              '<(SHARED_INTERMEDIATE_DIR)/sqlite3/OpenSSL-linux-<(target_arch)/libcrypto.a',
               '<(SHARED_INTERMEDIATE_DIR)/sqlite3/fts5-tokenizer/>(rust_arch)-unknown-linux-gnu/libfts5_tokenizer.a',
             ]
           }
