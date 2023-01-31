@@ -82,6 +82,8 @@
               '-llibssl.lib',
               '-lws2_32.lib',
               '-lcrypt32.lib',
+              '-lbcrypt.lib',
+              '-luserenv.lib',
               '-lsignal_tokenizer.lib',
             ],
             'library_dirs': [
