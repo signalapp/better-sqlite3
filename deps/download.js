@@ -6,8 +6,8 @@ const { Transform } = require('stream');
 const { pipeline } = require('stream/promises');
 
 const BASE_URI = `https://build-artifacts.signal.org/desktop`;
-const HASH = 'c5c051b19b8f4659606f1dff6c735bc4b0e0df85c470c035073f61c5e0a18200';
-const SQLCIPHER_VERSION = '4.5.2';
+const HASH = '0704eb1ab56b279da16d76ea7f25b596be509fcccb90310e9f520a7cd860d0c3';
+const SQLCIPHER_VERSION = '4.5.3-fts';
 const OPENSSL_VERSION = '3.0.7';
 const TOKENIZER_VERSION = '0.2.0';
 const TAG = [SQLCIPHER_VERSION, OPENSSL_VERSION, TOKENIZER_VERSION].join('--');
