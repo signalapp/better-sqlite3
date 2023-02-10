@@ -55,4 +55,10 @@ describe('Database#serialize()', function () {
 		const rows = this.lookupStmt.all({ query: "h*" });
 		expect(rows).to.eql(["[Hello]!world!  [how] are you?"]);
 	});
+
+	it("should ignore invalid utf8", function() {
+		this.insertStmt.run(Buffer.from([ 0x74 /* 't' */, 0xc3, 0x28 ]));
+		const rows = this.lookupStmt.all({ query: "t*" });
+		expect(rows).to.eql([]);
+	});
 });

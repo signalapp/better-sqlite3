@@ -6,10 +6,10 @@ const { Transform } = require('stream');
 const { pipeline } = require('stream/promises');
 
 const BASE_URI = `https://build-artifacts.signal.org/desktop`;
-const HASH = '0704eb1ab56b279da16d76ea7f25b596be509fcccb90310e9f520a7cd860d0c3';
+const HASH = 'b633825cf7e0fdd39a6cdf128f2bd76552a88d325f2b9cd07bb87a457cefb986';
 const SQLCIPHER_VERSION = '4.5.3-fts';
 const OPENSSL_VERSION = '3.0.7';
-const TOKENIZER_VERSION = '0.2.0';
+const TOKENIZER_VERSION = '0.2.1';
 const TAG = [SQLCIPHER_VERSION, OPENSSL_VERSION, TOKENIZER_VERSION].join('--');
 const URL = `${BASE_URI}/sqlcipher-${TAG}-${HASH}.tar.gz`;
 
