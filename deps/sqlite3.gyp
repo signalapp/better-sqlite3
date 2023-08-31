@@ -84,6 +84,7 @@
               '-lcrypt32.lib',
               '-lbcrypt.lib',
               '-luserenv.lib',
+              '-lntdll.lib',
               '-lsignal_tokenizer.lib',
             ],
             'library_dirs': [
