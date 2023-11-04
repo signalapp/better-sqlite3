@@ -1,4 +1,5 @@
 const https = require('https');
+const { HttpsProxyAgent } = require('https-proxy-agent');
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
@@ -35,7 +36,16 @@ async function main() {
 
 function download() {
   console.log(`downloading ${URL}`);
-  https.get(URL, async (res) => {
+
+  let options = {};
+  if (process.env.HTTPS_PROXY != undefined) {
+    options.agent = new HttpsProxyAgent(process.env.HTTPS_PROXY);
+  }
+  if (process.env.https_proxy != undefined) {
+    options.agent = new HttpsProxyAgent(process.env.https_proxy);
+  }
+
+  https.get(URL, options, async (res) => {
     const out = fs.createWriteStream(tmpFile);
 
     const hash = crypto.createHash('sha256');
