@@ -15,6 +15,7 @@ public:
 		SetPrototypeMethod(isolate, data, t, "defaultSafeIntegers", JS_defaultSafeIntegers);
 		SetPrototypeMethod(isolate, data, t, "unsafeMode", JS_unsafeMode);
 		SetPrototypeMethod(isolate, data, t, "createFTS5Tokenizer", JS_createFTS5Tokenizer);
+		SetPrototypeMethod(isolate, data, t, "signalTokenize", JS_signalTokenize);
 		SetPrototypeGetter(isolate, data, t, "open", JS_open);
 		SetPrototypeGetter(isolate, data, t, "inTransaction", JS_inTransaction);
 		return t->GetFunction(OnlyContext).ToLocalChecked();
@@ -464,6 +465,53 @@ private:
 		}
 		fts5->xCreateTokenizer(fts5, *utf8, t, t->get_api_object(),
 			&TokenizerModule::xDestroy);
+	}
+
+	static int SignalTokenizeCallback(
+		void *tokensPtr,
+		int _flags,
+		const char *token,
+		int len,
+		int _start,
+		int _end
+	) {
+		std::vector<std::string>* tokens =
+			reinterpret_cast<std::vector<std::string>*>(tokensPtr);
+		tokens->push_back(std::string(token, len));
+		return SQLITE_OK;
+	}
+
+	NODE_METHOD(JS_signalTokenize) {
+		UseAddon;
+		UseIsolate;
+		UseContext;
+
+		REQUIRE_ARGUMENT_STRING(first, v8::Local<v8::String> value);
+
+		v8::String::Utf8Value utf8(isolate, value);
+
+		std::vector<std::string> tokens;
+		int status = signal_fts5_tokenize(
+			nullptr,
+			reinterpret_cast<void*>(&tokens),
+			0,
+			*utf8,
+			utf8.length(),
+			SignalTokenizeCallback);
+		if (status != SQLITE_OK) {
+			ThrowSqliteError(addon, "Enable to tokenize string", status);
+			return;
+		}
+
+		v8::Local<v8::Array> result = v8::Array::New(isolate);
+
+		int i = 0;
+		for (auto &str: tokens) {
+			result->Set(ctx, i++, StringFromUtf8(isolate, str.c_str(), str.length()))
+				.FromJust();
+		}
+
+		info.GetReturnValue().Set(result);
 	}
 
 	NODE_GETTER(JS_open) {

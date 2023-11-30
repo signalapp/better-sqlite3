@@ -61,4 +61,11 @@ describe('Database#serialize()', function () {
 		const rows = this.lookupStmt.all({ query: "t*" });
 		expect(rows).to.eql([]);
 	});
+
+	it("should tokenize using signalTokenize", function() {
+		expect(this.db.signalTokenize("Hello signal.org!")).to.eql([
+			"hello",
+			"signal.org",
+		]);
+	});
 });

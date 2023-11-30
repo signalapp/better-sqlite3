@@ -96,6 +96,7 @@ declare namespace BetterSqlite3 {
         unsafeMode(unsafe?: boolean): this;
         serialize(options?: Database.SerializeOptions): Buffer;
         createFTS5Tokenizer(name: string, tokenizer: FTS5TokenizerConstructor): void;
+        signalTokenize(value: string): Array<string>;
     }
 
     interface DatabaseConstructor {
