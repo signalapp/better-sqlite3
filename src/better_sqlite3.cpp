@@ -164,9 +164,7 @@ void SetPrototypeGetter (v8::Isolate * isolate, v8::Local <v8::External> data, v
                 InternalizedFromLatin1(isolate, name),
                 func,
                 0,
-                data,
-                v8::AccessControl::DEFAULT,
-                v8::PropertyAttribute::None
+                data
         );
 }
 #line 4 "./src/util/constants.lzz"

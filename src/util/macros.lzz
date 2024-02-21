@@ -153,8 +153,6 @@ void SetPrototypeGetter(
 		InternalizedFromLatin1(isolate, name),
 		func,
 		0,
-		data,
-		v8::AccessControl::DEFAULT,
-		v8::PropertyAttribute::None
+		data
 	);
 }
