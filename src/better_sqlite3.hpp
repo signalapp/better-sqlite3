@@ -18,7 +18,7 @@
 #include <uv.h>
 #include "signal-tokenizer.h"
 #line 31 "./src/util/macros.lzz"
-template <class T> using CopyablePersistent = v8::Persistent<T, v8::CopyablePersistentTraits<T>>;
+template <class T> using CopyablePersistent = v8::Global<T>;
 #line 36 "./src/util/binder.lzz"
 	static bool IsPlainObject(v8::Isolate* isolate, v8::Local<v8::Object> obj);
 #define LZZ_INLINE inline
