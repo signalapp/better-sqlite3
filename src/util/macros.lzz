@@ -11,7 +11,7 @@
 #define UseIsolate v8::Isolate* isolate = OnlyIsolate
 #define UseContext v8::Local<v8::Context> ctx = OnlyContext
 #define UseAddon Addon* addon = OnlyAddon
-#define Unwrap ObjectWrapForElectron22::Unwrap
+#define Unwrap node::ObjectWrap::Unwrap
 
 inline v8::Local<v8::String> StringFromUtf8(v8::Isolate* isolate, const char* data, int length) {
 	return v8::String::NewFromUtf8(isolate, data, v8::NewStringType::kNormal, length).ToLocalChecked();
@@ -109,9 +109,7 @@ v8::Local<v8::FunctionTemplate> NewConstructorTemplate(
 	const char* name
 ) {
 	v8::Local<v8::FunctionTemplate> t = v8::FunctionTemplate::New(isolate, func, data);
-	// SIGNAL CHANGES BEGIN
-	t->InstanceTemplate()->SetInternalFieldCount(2);
-	// SIGNAL CHANGES END
+	t->InstanceTemplate()->SetInternalFieldCount(1);
 	t->SetClassName(InternalizedFromLatin1(isolate, name));
 	return t;
 }

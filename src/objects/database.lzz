@@ -1,4 +1,4 @@
-class Database : public ObjectWrapForElectron22 {
+class Database : public node::ObjectWrap {
 public:
 
 	INIT(Init) {
@@ -131,7 +131,7 @@ private:
 		sqlite3* db_handle,
 		v8::Local<v8::Value> logger
 	) :
-		ObjectWrapForElectron22(),
+		node::ObjectWrap(),
 		db_handle(db_handle),
 		open(true),
 		busy(false),

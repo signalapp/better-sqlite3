@@ -14,6 +14,7 @@
 #include <algorithm>
 #include <sqlite3.h>
 #include <node.h>
+#include <node_object_wrap.h>
 #include <node_buffer.h>
 #include <uv.h>
 #include "signal-tokenizer.h"
@@ -22,46 +23,6 @@ template <class T> using CopyablePersistent = v8::Global<T>;
 #line 36 "./src/util/binder.lzz"
 	static bool IsPlainObject(v8::Isolate* isolate, v8::Local<v8::Object> obj);
 #define LZZ_INLINE inline
-#line 32 "./src/util/object_wrap.lzz"
-class ObjectWrapForElectron22
-{
-#line 33 "./src/util/object_wrap.lzz"
-public:
-#line 34 "./src/util/object_wrap.lzz"
-  ObjectWrapForElectron22 ();
-#line 39 "./src/util/object_wrap.lzz"
-  virtual ~ ObjectWrapForElectron22 ();
-#line 47 "./src/util/object_wrap.lzz"
-  template <typename T>
-#line 48 "./src/util/object_wrap.lzz"
-  static T * Unwrap (v8::Local <v8::Object> handle);
-#line 61 "./src/util/object_wrap.lzz"
-  v8::Local <v8::Object> handle ();
-#line 66 "./src/util/object_wrap.lzz"
-  v8::Local <v8::Object> handle (v8::Isolate * isolate);
-#line 72 "./src/util/object_wrap.lzz"
-  v8::Persistent <v8::Object> & persistent ();
-#line 77 "./src/util/object_wrap.lzz"
-protected:
-#line 78 "./src/util/object_wrap.lzz"
-  void Wrap (v8::Local <v8::Object> handle);
-#line 90 "./src/util/object_wrap.lzz"
-  void MakeWeak ();
-#line 98 "./src/util/object_wrap.lzz"
-  virtual void Ref ();
-#line 113 "./src/util/object_wrap.lzz"
-  virtual void Unref ();
-#line 121 "./src/util/object_wrap.lzz"
-  int refs_;
-#line 123 "./src/util/object_wrap.lzz"
-private:
-#line 124 "./src/util/object_wrap.lzz"
-  static void WeakCallback (v8::WeakCallbackInfo <ObjectWrapForElectron22> const & data);
-#line 133 "./src/util/object_wrap.lzz"
-  v8::Persistent <v8::Object> handle_;
-#line 136 "./src/util/object_wrap.lzz"
-  static uint16_t kNodeEmbedderId;
-};
 #line 16 "./src/util/macros.lzz"
 v8::Local <v8::String> StringFromUtf8 (v8::Isolate * isolate, char const * data, int length);
 #line 19 "./src/util/macros.lzz"
@@ -90,11 +51,11 @@ template <typename T>
 void FREE_ARRAY (T * array_pointer);
 #line 105 "./src/util/macros.lzz"
 v8::Local <v8::FunctionTemplate> NewConstructorTemplate (v8::Isolate * isolate, v8::Local <v8::External> data, v8::FunctionCallback func, char const * name);
-#line 118 "./src/util/macros.lzz"
+#line 116 "./src/util/macros.lzz"
 void SetPrototypeMethod (v8::Isolate * isolate, v8::Local <v8::External> data, v8::Local <v8::FunctionTemplate> recv, char const * name, v8::FunctionCallback func);
-#line 131 "./src/util/macros.lzz"
+#line 129 "./src/util/macros.lzz"
 void SetPrototypeSymbolMethod (v8::Isolate * isolate, v8::Local <v8::External> data, v8::Local <v8::FunctionTemplate> recv, v8::Local <v8::Symbol> symbol, v8::FunctionCallback func);
-#line 144 "./src/util/macros.lzz"
+#line 142 "./src/util/macros.lzz"
 void SetPrototypeGetter (v8::Isolate * isolate, v8::Local <v8::External> data, v8::Local <v8::FunctionTemplate> recv, char const * name, v8::AccessorGetterCallback func);
 #line 1 "./src/util/constants.lzz"
 class CS
@@ -209,7 +170,7 @@ class SignalTokenizerModule;
 #line 26 "./src/better_sqlite3.lzz"
 class Backup;
 #line 1 "./src/objects/database.lzz"
-class Database : public ObjectWrapForElectron22
+class Database : public node::ObjectWrap
 {
 #line 2 "./src/objects/database.lzz"
 public:
@@ -359,7 +320,7 @@ private:
   std::set <Backup*, CompareBackup> backups;
 };
 #line 1 "./src/objects/statement.lzz"
-class Statement : public ObjectWrapForElectron22
+class Statement : public node::ObjectWrap
 {
 #line 1 "./src/objects/statement.lzz"
   friend class StatementIterator;
@@ -437,7 +398,7 @@ private:
   bool const returns_data;
 };
 #line 1 "./src/objects/statement-iterator.lzz"
-class StatementIterator : public ObjectWrapForElectron22
+class StatementIterator : public node::ObjectWrap
 {
 #line 2 "./src/objects/statement-iterator.lzz"
 public:
@@ -487,7 +448,7 @@ private:
   bool logged;
 };
 #line 1 "./src/objects/backup.lzz"
-class Backup : public ObjectWrapForElectron22
+class Backup : public node::ObjectWrap
 {
 #line 2 "./src/objects/backup.lzz"
 public:
@@ -932,59 +893,6 @@ struct Addon
 #line 104 "./src/better_sqlite3.lzz"
   static uv_key_t thread_key;
 };
-#line 47 "./src/util/object_wrap.lzz"
-template <typename T>
-#line 48 "./src/util/object_wrap.lzz"
-LZZ_INLINE T * ObjectWrapForElectron22::Unwrap (v8::Local <v8::Object> handle)
-#line 48 "./src/util/object_wrap.lzz"
-                                                        {
-    assert(!handle.IsEmpty());
-    assert(handle->InternalFieldCount() > 1);
-
-
-
-    void* ptr = handle->GetAlignedPointerFromInternalField(1);
-
-    ObjectWrapForElectron22* wrap = static_cast<ObjectWrapForElectron22*>(ptr);
-    return static_cast<T*>(wrap);
-}
-#line 61 "./src/util/object_wrap.lzz"
-LZZ_INLINE v8::Local <v8::Object> ObjectWrapForElectron22::handle ()
-#line 61 "./src/util/object_wrap.lzz"
-                                        {
-    return handle(v8::Isolate::GetCurrent());
-}
-#line 66 "./src/util/object_wrap.lzz"
-LZZ_INLINE v8::Local <v8::Object> ObjectWrapForElectron22::handle (v8::Isolate * isolate)
-#line 66 "./src/util/object_wrap.lzz"
-                                                            {
-    return v8::Local<v8::Object>::New(isolate, persistent());
-}
-#line 72 "./src/util/object_wrap.lzz"
-LZZ_INLINE v8::Persistent <v8::Object> & ObjectWrapForElectron22::persistent ()
-#line 72 "./src/util/object_wrap.lzz"
-                                                  {
-    return handle_;
-}
-#line 78 "./src/util/object_wrap.lzz"
-LZZ_INLINE void ObjectWrapForElectron22::Wrap (v8::Local <v8::Object> handle)
-#line 78 "./src/util/object_wrap.lzz"
-                                                 {
-    assert(persistent().IsEmpty());
-    assert(handle->InternalFieldCount() > 1);
-
-    handle->SetAlignedPointerInInternalField(0, &kNodeEmbedderId);
-    handle->SetAlignedPointerInInternalField(1, this);
-
-    persistent().Reset(v8::Isolate::GetCurrent(), handle);
-    MakeWeak();
-}
-#line 90 "./src/util/object_wrap.lzz"
-LZZ_INLINE void ObjectWrapForElectron22::MakeWeak ()
-#line 90 "./src/util/object_wrap.lzz"
-                         {
-    persistent().SetWeak(this, WeakCallback, v8::WeakCallbackType::kParameter);
-}
 #line 16 "./src/util/macros.lzz"
 LZZ_INLINE v8::Local <v8::String> StringFromUtf8 (v8::Isolate * isolate, char const * data, int length)
 #line 16 "./src/util/macros.lzz"
