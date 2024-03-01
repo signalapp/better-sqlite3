@@ -1,4 +1,4 @@
-const https = require('https');
+const axios = require('axios');
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
@@ -33,30 +33,35 @@ async function main() {
   download();
 }
 
-function download() {
+async function download() {
   console.log(`downloading ${URL}`);
-  https.get(URL, async (res) => {
-    const out = fs.createWriteStream(tmpFile);
+  const response = await axios({
+    method: 'get',
+    url: URL,
+    responseType: 'stream'
+  });
 
-    const hash = crypto.createHash('sha256');
+  console.log(`Writing to temp file ${tmpFile}`);
+  const out = fs.createWriteStream(tmpFile);
 
-    const t = new Transform({
-      transform(chunk, encoding, callback) {
-        hash.write(chunk, encoding);
-        callback(null, chunk);
-      }
-    });
+  const hash = crypto.createHash('sha256');
 
-    await pipeline(res, t, out);
-
-    const actualDigest = hash.digest('hex');
-    if (actualDigest !== HASH) {
-      fs.unlinkSync(tmpFile);
-      throw new Error(`Digest mismatch. Expected ${HASH} got ${actualDigest}`);
+  const t = new Transform({
+    transform(chunk, encoding, callback) {
+      hash.write(chunk, encoding);
+      callback(null, chunk);
     }
+  });
 
-    fs.renameSync(tmpFile, finalFile);
-  })
+  await pipeline(response.data, t, out);
+
+  const actualDigest = hash.digest('hex');
+  if (actualDigest !== HASH) {
+    fs.unlinkSync(tmpFile);
+    throw new Error(`Digest mismatch. Expected ${HASH} got ${actualDigest}`);
+  }
+
+  fs.renameSync(tmpFile, finalFile);
 }
 
 main();
