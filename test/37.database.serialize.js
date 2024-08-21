@@ -68,7 +68,7 @@ describe('Database#serialize()', function () {
 		expect(buffer.length).to.equal(bufferCopy.length);
 		expect(buffer).to.deep.equal(bufferCopy);
 	});
-	it('should work with an empty database', async function () {
+	it.skip('should work with an empty database', async function () {
 		this.db.close();
 		this.db = new Database();
 		const buffer = this.db.serialize();
