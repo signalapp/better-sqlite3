@@ -56,7 +56,7 @@ void SetPrototypeMethod (v8::Isolate * isolate, v8::Local <v8::External> data, v
 #line 129 "./src/util/macros.lzz"
 void SetPrototypeSymbolMethod (v8::Isolate * isolate, v8::Local <v8::External> data, v8::Local <v8::FunctionTemplate> recv, v8::Local <v8::Symbol> symbol, v8::FunctionCallback func);
 #line 142 "./src/util/macros.lzz"
-void SetPrototypeGetter (v8::Isolate * isolate, v8::Local <v8::External> data, v8::Local <v8::FunctionTemplate> recv, char const * name, v8::AccessorGetterCallback func);
+void SetPrototypeGetter (v8::Isolate * isolate, v8::Local <v8::External> data, v8::Local <v8::FunctionTemplate> recv, char const * name, v8::FunctionCallback func);
 #line 1 "./src/util/constants.lzz"
 class CS
 {
@@ -283,9 +283,9 @@ private:
 #line 484 "./src/objects/database.lzz"
   static void JS_signalTokenize (v8::FunctionCallbackInfo <v8 :: Value> const & info);
 #line 517 "./src/objects/database.lzz"
-  static void JS_open (v8::Local <v8 :: String> _, v8::PropertyCallbackInfo <v8 :: Value> const & info);
+  static void JS_open (v8::FunctionCallbackInfo <v8 :: Value> const & info);
 #line 521 "./src/objects/database.lzz"
-  static void JS_inTransaction (v8::Local <v8 :: String> _, v8::PropertyCallbackInfo <v8 :: Value> const & info);
+  static void JS_inTransaction (v8::FunctionCallbackInfo <v8 :: Value> const & info);
 #line 526 "./src/objects/database.lzz"
   static bool Deserialize (v8::Local <v8::Object> buffer, Addon * addon, sqlite3 * db_handle, bool readonly);
 #line 551 "./src/objects/database.lzz"
@@ -375,7 +375,7 @@ private:
 #line 271 "./src/objects/statement.lzz"
   static void JS_columns (v8::FunctionCallbackInfo <v8 :: Value> const & info);
 #line 314 "./src/objects/statement.lzz"
-  static void JS_busy (v8::Local <v8 :: String> _, v8::PropertyCallbackInfo <v8 :: Value> const & info);
+  static void JS_busy (v8::FunctionCallbackInfo <v8 :: Value> const & info);
 #line 319 "./src/objects/statement.lzz"
   Database * const db;
 #line 320 "./src/objects/statement.lzz"

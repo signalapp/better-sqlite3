@@ -110,15 +110,15 @@ void SetPrototypeSymbolMethod (v8::Isolate * isolate, v8::Local <v8::External> d
         );
 }
 #line 142 "./src/util/macros.lzz"
-void SetPrototypeGetter (v8::Isolate * isolate, v8::Local <v8::External> data, v8::Local <v8::FunctionTemplate> recv, char const * name, v8::AccessorGetterCallback func)
+void SetPrototypeGetter (v8::Isolate * isolate, v8::Local <v8::External> data, v8::Local <v8::FunctionTemplate> recv, char const * name, v8::FunctionCallback func)
 #line 148 "./src/util/macros.lzz"
   {
         v8::HandleScope scope(isolate);
-        recv->InstanceTemplate()->SetAccessor(
+        v8::Local<v8::FunctionTemplate> func_tpl =
+                v8::FunctionTemplate::New(isolate, func, data);
+        recv->InstanceTemplate()->SetAccessorProperty(
                 InternalizedFromLatin1(isolate, name),
-                func,
-                0,
-                data
+                func_tpl
         );
 }
 #line 4 "./src/util/constants.lzz"
@@ -811,13 +811,13 @@ void Database::JS_signalTokenize (v8::FunctionCallbackInfo <v8 :: Value> const &
                 info.GetReturnValue().Set(result);
 }
 #line 517 "./src/objects/database.lzz"
-void Database::JS_open (v8::Local <v8 :: String> _, v8::PropertyCallbackInfo <v8 :: Value> const & info)
+void Database::JS_open (v8::FunctionCallbackInfo <v8 :: Value> const & info)
 #line 517 "./src/objects/database.lzz"
                              {
                 info.GetReturnValue().Set( node :: ObjectWrap :: Unwrap <Database>(info.This())->open);
 }
 #line 521 "./src/objects/database.lzz"
-void Database::JS_inTransaction (v8::Local <v8 :: String> _, v8::PropertyCallbackInfo <v8 :: Value> const & info)
+void Database::JS_inTransaction (v8::FunctionCallbackInfo <v8 :: Value> const & info)
 #line 521 "./src/objects/database.lzz"
                                       {
                 Database* db = node :: ObjectWrap :: Unwrap <Database>(info.This());
@@ -1179,7 +1179,7 @@ void Statement::JS_columns (v8::FunctionCallbackInfo <v8 :: Value> const & info)
                 info.GetReturnValue().Set(columns);
 }
 #line 314 "./src/objects/statement.lzz"
-void Statement::JS_busy (v8::Local <v8 :: String> _, v8::PropertyCallbackInfo <v8 :: Value> const & info)
+void Statement::JS_busy (v8::FunctionCallbackInfo <v8 :: Value> const & info)
 #line 314 "./src/objects/statement.lzz"
                              {
                 Statement* stmt = node :: ObjectWrap :: Unwrap <Statement>(info.This());
