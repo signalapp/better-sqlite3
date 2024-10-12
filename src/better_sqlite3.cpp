@@ -2102,26 +2102,22 @@ namespace Data
   v8::Local <v8::Value> GetFlatRowJS (v8::Isolate * isolate, v8::Local <v8::Context> ctx, sqlite3_stmt * handle, bool safe_ints)
 #line 80 "./src/util/data.lzz"
                                                                                                                                   {
+                v8::Local<v8::Object> row = v8::Object::New(isolate);
                 int column_count = sqlite3_column_count(handle);
-                std::vector<v8::Local<v8::Name>> keys;
-                std::vector<v8::Local<v8::Value>> values;
-                keys.reserve(column_count);
-                values.reserve(column_count);
-
                 for (int i = 0; i < column_count; ++i) {
-                        keys.emplace_back(InternalizedFromUtf8(isolate, sqlite3_column_name(handle, i), -1));
-                        values.emplace_back(Data::GetValueJS(isolate, handle, i, safe_ints));
+                        row->Set(ctx,
+                                InternalizedFromUtf8(isolate, sqlite3_column_name(handle, i), -1),
+                                Data::GetValueJS(isolate, handle, i, safe_ints)).FromJust();
                 }
-
-                return v8::Object::New(isolate, v8::Null(isolate), keys.data(), values.data(), column_count);
+                return row;
   }
 }
 #line 65 "./src/util/data.lzz"
 namespace Data
 {
-#line 95 "./src/util/data.lzz"
+#line 91 "./src/util/data.lzz"
   v8::Local <v8::Value> GetExpandedRowJS (v8::Isolate * isolate, v8::Local <v8::Context> ctx, sqlite3_stmt * handle, bool safe_ints)
-#line 95 "./src/util/data.lzz"
+#line 91 "./src/util/data.lzz"
                                                                                                                                       {
                 v8::Local<v8::Object> row = v8::Object::New(isolate);
                 int column_count = sqlite3_column_count(handle);
@@ -2144,9 +2140,9 @@ namespace Data
 #line 65 "./src/util/data.lzz"
 namespace Data
 {
-#line 114 "./src/util/data.lzz"
+#line 110 "./src/util/data.lzz"
   v8::Local <v8::Value> GetRawRowJS (v8::Isolate * isolate, v8::Local <v8::Context> ctx, sqlite3_stmt * handle, bool safe_ints)
-#line 114 "./src/util/data.lzz"
+#line 110 "./src/util/data.lzz"
                                                                                                                                  {
                 v8::Local<v8::Array> row = v8::Array::New(isolate);
                 int column_count = sqlite3_column_count(handle);
@@ -2159,9 +2155,9 @@ namespace Data
 #line 65 "./src/util/data.lzz"
 namespace Data
 {
-#line 123 "./src/util/data.lzz"
+#line 119 "./src/util/data.lzz"
   v8::Local <v8::Value> GetRowJS (v8::Isolate * isolate, v8::Local <v8::Context> ctx, sqlite3_stmt * handle, bool safe_ints, char mode)
-#line 123 "./src/util/data.lzz"
+#line 119 "./src/util/data.lzz"
                                                                                                                                          {
                 if (mode == FLAT) return GetFlatRowJS(isolate, ctx, handle, safe_ints);
                 if (mode == PLUCK) return GetValueJS(isolate, handle, 0, safe_ints);
@@ -2174,9 +2170,9 @@ namespace Data
 #line 65 "./src/util/data.lzz"
 namespace Data
 {
-#line 132 "./src/util/data.lzz"
+#line 128 "./src/util/data.lzz"
   void GetArgumentsJS (v8::Isolate * isolate, v8::Local <v8::Value> * out, sqlite3_value * * values, int argument_count, bool safe_ints)
-#line 132 "./src/util/data.lzz"
+#line 128 "./src/util/data.lzz"
                                                                                                                                          {
                 assert(argument_count > 0);
                 for (int i = 0; i < argument_count; ++i) {
@@ -2187,9 +2183,9 @@ namespace Data
 #line 65 "./src/util/data.lzz"
 namespace Data
 {
-#line 139 "./src/util/data.lzz"
+#line 135 "./src/util/data.lzz"
   int BindValueFromJS (v8::Isolate * isolate, sqlite3_stmt * handle, int index, v8::Local <v8::Value> value)
-#line 139 "./src/util/data.lzz"
+#line 135 "./src/util/data.lzz"
                                                                                                                {
                 if ( value -> IsNumber ( ) ) { return sqlite3_bind_double ( handle , index , value . As < v8 :: Number > ( ) -> Value ( ) ) ; } else if ( value -> IsBigInt ( ) ) { bool lossless ; int64_t v = value . As < v8 :: BigInt > ( ) -> Int64Value ( & lossless ) ; if ( lossless ) { return sqlite3_bind_int64 ( handle , index , v ) ; } } else if ( value -> IsString ( ) ) { v8 :: String :: Utf8Value utf8 ( isolate , value . As < v8 :: String > ( ) ) ; return sqlite3_bind_text ( handle , index , * utf8 , utf8 . length ( ) , SQLITE_TRANSIENT ) ; } else if ( node :: Buffer :: HasInstance ( value ) ) { const char * data = node :: Buffer :: Data ( value ) ; return sqlite3_bind_blob ( handle , index , data ? data : "" , node :: Buffer :: Length ( value ) , SQLITE_TRANSIENT ) ; } else if ( value -> IsNull ( ) || value -> IsUndefined ( ) ) { return sqlite3_bind_null ( handle , index ) ; } ;
                 return value->IsBigInt() ? SQLITE_TOOBIG : -1;
@@ -2198,9 +2194,9 @@ namespace Data
 #line 65 "./src/util/data.lzz"
 namespace Data
 {
-#line 144 "./src/util/data.lzz"
+#line 140 "./src/util/data.lzz"
   void ResultValueFromJS (v8::Isolate * isolate, sqlite3_context * invocation, v8::Local <v8::Value> value, DataConverter * converter)
-#line 144 "./src/util/data.lzz"
+#line 140 "./src/util/data.lzz"
                                                                                                                                         {
                 if ( value -> IsNumber ( ) ) { return sqlite3_result_double ( invocation , value . As < v8 :: Number > ( ) -> Value ( ) ) ; } else if ( value -> IsBigInt ( ) ) { bool lossless ; int64_t v = value . As < v8 :: BigInt > ( ) -> Int64Value ( & lossless ) ; if ( lossless ) { return sqlite3_result_int64 ( invocation , v ) ; } } else if ( value -> IsString ( ) ) { v8 :: String :: Utf8Value utf8 ( isolate , value . As < v8 :: String > ( ) ) ; return sqlite3_result_text ( invocation , * utf8 , utf8 . length ( ) , SQLITE_TRANSIENT ) ; } else if ( node :: Buffer :: HasInstance ( value ) ) { const char * data = node :: Buffer :: Data ( value ) ; return sqlite3_result_blob ( invocation , data ? data : "" , node :: Buffer :: Length ( value ) , SQLITE_TRANSIENT ) ; } else if ( value -> IsNull ( ) || value -> IsUndefined ( ) ) { return sqlite3_result_null ( invocation ) ; } ;
                 converter->ThrowDataConversionError(invocation, value->IsBigInt());

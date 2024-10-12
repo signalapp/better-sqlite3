@@ -78,18 +78,14 @@ namespace Data {
 	}
 
 	v8::Local<v8::Value> GetFlatRowJS(v8::Isolate* isolate, v8::Local<v8::Context> ctx, sqlite3_stmt* handle, bool safe_ints) {
+		v8::Local<v8::Object> row = v8::Object::New(isolate);
 		int column_count = sqlite3_column_count(handle);
-		std::vector<v8::Local<v8::Name>> keys;
-		std::vector<v8::Local<v8::Value>> values;
-		keys.reserve(column_count);
-		values.reserve(column_count);
-
 		for (int i = 0; i < column_count; ++i) {
-			keys.emplace_back(InternalizedFromUtf8(isolate, sqlite3_column_name(handle, i), -1));
-			values.emplace_back(Data::GetValueJS(isolate, handle, i, safe_ints));
+			row->Set(ctx,
+				InternalizedFromUtf8(isolate, sqlite3_column_name(handle, i), -1),
+				Data::GetValueJS(isolate, handle, i, safe_ints)).FromJust();
 		}
-
-		return v8::Object::New(isolate, v8::Null(isolate), keys.data(), values.data(), column_count);
+		return row;
 	}
 
 	v8::Local<v8::Value> GetExpandedRowJS(v8::Isolate* isolate, v8::Local<v8::Context> ctx, sqlite3_stmt* handle, bool safe_ints) {
