@@ -782,37 +782,37 @@ namespace Data
 #line 65 "./src/util/data.lzz"
 namespace Data
 {
-#line 91 "./src/util/data.lzz"
+#line 95 "./src/util/data.lzz"
   v8::Local <v8::Value> GetExpandedRowJS (v8::Isolate * isolate, v8::Local <v8::Context> ctx, sqlite3_stmt * handle, bool safe_ints);
 }
 #line 65 "./src/util/data.lzz"
 namespace Data
 {
-#line 110 "./src/util/data.lzz"
+#line 114 "./src/util/data.lzz"
   v8::Local <v8::Value> GetRawRowJS (v8::Isolate * isolate, v8::Local <v8::Context> ctx, sqlite3_stmt * handle, bool safe_ints);
 }
 #line 65 "./src/util/data.lzz"
 namespace Data
 {
-#line 119 "./src/util/data.lzz"
+#line 123 "./src/util/data.lzz"
   v8::Local <v8::Value> GetRowJS (v8::Isolate * isolate, v8::Local <v8::Context> ctx, sqlite3_stmt * handle, bool safe_ints, char mode);
 }
 #line 65 "./src/util/data.lzz"
 namespace Data
 {
-#line 128 "./src/util/data.lzz"
+#line 132 "./src/util/data.lzz"
   void GetArgumentsJS (v8::Isolate * isolate, v8::Local <v8::Value> * out, sqlite3_value * * values, int argument_count, bool safe_ints);
 }
 #line 65 "./src/util/data.lzz"
 namespace Data
 {
-#line 135 "./src/util/data.lzz"
+#line 139 "./src/util/data.lzz"
   int BindValueFromJS (v8::Isolate * isolate, sqlite3_stmt * handle, int index, v8::Local <v8::Value> value);
 }
 #line 65 "./src/util/data.lzz"
 namespace Data
 {
-#line 140 "./src/util/data.lzz"
+#line 144 "./src/util/data.lzz"
   void ResultValueFromJS (v8::Isolate * isolate, sqlite3_context * invocation, v8::Local <v8::Value> value, DataConverter * converter);
 }
 #line 1 "./src/util/binder.lzz"
