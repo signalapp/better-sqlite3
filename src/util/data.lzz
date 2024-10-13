@@ -77,19 +77,24 @@ namespace Data {
 		SQLITE_VALUE_TO_JS(value, isolate, safe_ints, value);
 	}
 
-	v8::Local<v8::Value> GetFlatRowJS(v8::Isolate* isolate, v8::Local<v8::Context> ctx, sqlite3_stmt* handle, bool safe_ints) {
-		int column_count = sqlite3_column_count(handle);
-		std::vector<v8::Local<v8::Name>> keys;
-		std::vector<v8::Local<v8::Value>> values;
-		keys.reserve(column_count);
-		values.reserve(column_count);
+	v8::Local<v8::Value> GetFlatRowJS(v8::Isolate* isolate, v8::Local<v8::Context> ctx, sqlite3_stmt* handle, bool safe_ints, std::vector<v8::Local<v8::Name> >& keys) {
+		// Lazily initialize keys
+		if (keys.size() == 0) {
+			int column_count = sqlite3_column_count(handle);
+			keys.reserve(column_count);
+			for (int i = 0; i < column_count; ++i) {
+				keys.emplace_back(InternalizedFromUtf8(isolate, sqlite3_column_name(handle, i), -1));
+			}
+		}
 
-		for (int i = 0; i < column_count; ++i) {
-			keys.emplace_back(InternalizedFromUtf8(isolate, sqlite3_column_name(handle, i), -1));
+		std::vector<v8::Local<v8::Value>> values;
+		values.reserve(keys.size());
+
+		for (size_t i = 0; i < keys.size(); ++i) {
 			values.emplace_back(Data::GetValueJS(isolate, handle, i, safe_ints));
 		}
 
-		return v8::Object::New(isolate, v8::Null(isolate), keys.data(), values.data(), column_count);
+		return v8::Object::New(isolate, v8::Null(isolate), keys.data(), values.data(), keys.size());
 	}
 
 	v8::Local<v8::Value> GetExpandedRowJS(v8::Isolate* isolate, v8::Local<v8::Context> ctx, sqlite3_stmt* handle, bool safe_ints) {
@@ -120,8 +125,8 @@ namespace Data {
 		return row;
 	}
 
-	v8::Local<v8::Value> GetRowJS(v8::Isolate* isolate, v8::Local<v8::Context> ctx, sqlite3_stmt* handle, bool safe_ints, char mode) {
-		if (mode == FLAT) return GetFlatRowJS(isolate, ctx, handle, safe_ints);
+	v8::Local<v8::Value> GetRowJS(v8::Isolate* isolate, v8::Local<v8::Context> ctx, sqlite3_stmt* handle, bool safe_ints, char mode, std::vector<v8::Local<v8::Name> >& keys) {
+		if (mode == FLAT) return GetFlatRowJS(isolate, ctx, handle, safe_ints, keys);
 		if (mode == PLUCK) return GetValueJS(isolate, handle, 0, safe_ints);
 		if (mode == EXPAND) return GetExpandedRowJS(isolate, ctx, handle, safe_ints);
 		if (mode == RAW) return GetRawRowJS(isolate, ctx, handle, safe_ints);

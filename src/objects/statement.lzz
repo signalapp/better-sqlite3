@@ -173,7 +173,8 @@ private:
 		STATEMENT_START(REQUIRE_STATEMENT_RETURNS_DATA, DOES_NOT_MUTATE);
 		int status = sqlite3_step(handle);
 		if (status == SQLITE_ROW) {
-			v8::Local<v8::Value> result = Data::GetRowJS(isolate, OnlyContext, handle, stmt->safe_ints, stmt->mode);
+			std::vector<v8::Local<v8::Name> > keys;
+			v8::Local<v8::Value> result = Data::GetRowJS(isolate, OnlyContext, handle, stmt->safe_ints, stmt->mode, keys);
 			sqlite3_reset(handle);
 			STATEMENT_RETURN(result);
 		} else if (status == SQLITE_DONE) {
@@ -192,10 +193,11 @@ private:
 		const bool safe_ints = stmt->safe_ints;
 		const char mode = stmt->mode;
 		bool js_error = false;
+		std::vector<v8::Local<v8::Name> > keys;
 
 		while (sqlite3_step(handle) == SQLITE_ROW) {
 			if (row_count == 0xffffffff) { ThrowRangeError("Array overflow (too many rows returned)"); js_error = true; break; }
-			result->Set(ctx, row_count++, Data::GetRowJS(isolate, ctx, handle, safe_ints, mode)).FromJust();
+			result->Set(ctx, row_count++, Data::GetRowJS(isolate, ctx, handle, safe_ints, mode, keys)).FromJust();
 		}
 
 		if (sqlite3_reset(handle) == SQLITE_OK && !js_error) {

@@ -1025,7 +1025,8 @@ void Statement::JS_get (v8::FunctionCallbackInfo <v8 :: Value> const & info)
                 Statement * stmt = node :: ObjectWrap :: Unwrap < Statement > ( info . This ( ) ) ; if ( ! stmt -> returns_data ) return ThrowTypeError ( "This statement does not return data. Use run() instead" ) ; sqlite3_stmt * handle = stmt -> handle ; Database * db = stmt -> db ; if ( ! db -> GetState ( ) -> open ) return ThrowTypeError ( "The database connection is not open" ) ; if ( db -> GetState ( ) -> busy ) return ThrowTypeError ( "This database connection is busy executing a query" ) ; if ( stmt -> locked ) return ThrowTypeError ( "This statement is busy executing a query" ) ; const bool bound = stmt -> bound ; if ( ! bound ) { Binder binder ( handle ) ; if ( ! binder . Bind ( info , info . Length ( ) , stmt ) ) { sqlite3_clear_bindings ( handle ) ; return ; } ( ( void ) 0 ) ; } else if ( info . Length ( ) > 0 ) { return ThrowTypeError ( "This statement already has bound parameters" ) ; } ( ( void ) 0 ) ; db -> GetState ( ) -> busy = true ; v8 :: Isolate * isolate = info . GetIsolate ( ) ; if ( db -> Log ( isolate , handle ) ) { db -> GetState ( ) -> busy = false ; db -> ThrowDatabaseError ( ) ; if ( ! bound ) { sqlite3_clear_bindings ( handle ) ; } return ; } ( ( void ) 0 ) ;
                 int status = sqlite3_step(handle);
                 if (status == SQLITE_ROW) {
-                        v8::Local<v8::Value> result = Data::GetRowJS(isolate, isolate -> GetCurrentContext ( ) , handle, stmt->safe_ints, stmt->mode);
+                        std::vector<v8::Local<v8::Name> > keys;
+                        v8::Local<v8::Value> result = Data::GetRowJS(isolate, isolate -> GetCurrentContext ( ) , handle, stmt->safe_ints, stmt->mode, keys);
                         sqlite3_reset(handle);
                         db -> GetState ( ) -> busy = false ; info . GetReturnValue ( ) . Set ( result ) ; if ( ! bound ) { sqlite3_clear_bindings ( handle ) ; } return ;
                 } else if (status == SQLITE_DONE) {
@@ -1035,9 +1036,9 @@ void Statement::JS_get (v8::FunctionCallbackInfo <v8 :: Value> const & info)
                 sqlite3_reset(handle);
                 db -> GetState ( ) -> busy = false ; db -> ThrowDatabaseError ( ) ; if ( ! bound ) { sqlite3_clear_bindings ( handle ) ; } return ;
 }
-#line 187 "./src/objects/statement.lzz"
+#line 188 "./src/objects/statement.lzz"
 void Statement::JS_all (v8::FunctionCallbackInfo <v8 :: Value> const & info)
-#line 187 "./src/objects/statement.lzz"
+#line 188 "./src/objects/statement.lzz"
                             {
                 Statement * stmt = node :: ObjectWrap :: Unwrap < Statement > ( info . This ( ) ) ; if ( ! stmt -> returns_data ) return ThrowTypeError ( "This statement does not return data. Use run() instead" ) ; sqlite3_stmt * handle = stmt -> handle ; Database * db = stmt -> db ; if ( ! db -> GetState ( ) -> open ) return ThrowTypeError ( "The database connection is not open" ) ; if ( db -> GetState ( ) -> busy ) return ThrowTypeError ( "This database connection is busy executing a query" ) ; if ( stmt -> locked ) return ThrowTypeError ( "This statement is busy executing a query" ) ; const bool bound = stmt -> bound ; if ( ! bound ) { Binder binder ( handle ) ; if ( ! binder . Bind ( info , info . Length ( ) , stmt ) ) { sqlite3_clear_bindings ( handle ) ; return ; } ( ( void ) 0 ) ; } else if ( info . Length ( ) > 0 ) { return ThrowTypeError ( "This statement already has bound parameters" ) ; } ( ( void ) 0 ) ; db -> GetState ( ) -> busy = true ; v8 :: Isolate * isolate = info . GetIsolate ( ) ; if ( db -> Log ( isolate , handle ) ) { db -> GetState ( ) -> busy = false ; db -> ThrowDatabaseError ( ) ; if ( ! bound ) { sqlite3_clear_bindings ( handle ) ; } return ; } ( ( void ) 0 ) ;
                 v8 :: Local < v8 :: Context > ctx = isolate -> GetCurrentContext ( ) ;
@@ -1046,10 +1047,11 @@ void Statement::JS_all (v8::FunctionCallbackInfo <v8 :: Value> const & info)
                 const bool safe_ints = stmt->safe_ints;
                 const char mode = stmt->mode;
                 bool js_error = false;
+                std::vector<v8::Local<v8::Name> > keys;
 
                 while (sqlite3_step(handle) == SQLITE_ROW) {
                         if (row_count == 0xffffffff) { ThrowRangeError("Array overflow (too many rows returned)"); js_error = true; break; }
-                        result->Set(ctx, row_count++, Data::GetRowJS(isolate, ctx, handle, safe_ints, mode)).FromJust();
+                        result->Set(ctx, row_count++, Data::GetRowJS(isolate, ctx, handle, safe_ints, mode, keys)).FromJust();
                 }
 
                 if (sqlite3_reset(handle) == SQLITE_OK && !js_error) {
@@ -1058,9 +1060,9 @@ void Statement::JS_all (v8::FunctionCallbackInfo <v8 :: Value> const & info)
                 if (js_error) db->GetState()->was_js_error = true;
                 db -> GetState ( ) -> busy = false ; db -> ThrowDatabaseError ( ) ; if ( ! bound ) { sqlite3_clear_bindings ( handle ) ; } return ;
 }
-#line 208 "./src/objects/statement.lzz"
+#line 210 "./src/objects/statement.lzz"
 void Statement::JS_iterate (v8::FunctionCallbackInfo <v8 :: Value> const & info)
-#line 208 "./src/objects/statement.lzz"
+#line 210 "./src/objects/statement.lzz"
                                 {
                 Addon * addon = static_cast < Addon * > ( info . Data ( ) . As < v8 :: External > ( ) -> Value ( ) ) ;
                 v8 :: Isolate * isolate = info . GetIsolate ( ) ;
@@ -1070,9 +1072,9 @@ void Statement::JS_iterate (v8::FunctionCallbackInfo <v8 :: Value> const & info)
                 addon->privileged_info = NULL;
                 if (!maybeIterator.IsEmpty()) info.GetReturnValue().Set(maybeIterator.ToLocalChecked());
 }
-#line 218 "./src/objects/statement.lzz"
+#line 220 "./src/objects/statement.lzz"
 void Statement::JS_bind (v8::FunctionCallbackInfo <v8 :: Value> const & info)
-#line 218 "./src/objects/statement.lzz"
+#line 220 "./src/objects/statement.lzz"
                              {
                 Statement* stmt = node :: ObjectWrap :: Unwrap <Statement>(info.This());
                 if (stmt->bound) return ThrowTypeError("The bind() method can only be invoked once per statement object");
@@ -1083,9 +1085,9 @@ void Statement::JS_bind (v8::FunctionCallbackInfo <v8 :: Value> const & info)
                 stmt->bound = true;
                 info.GetReturnValue().Set(info.This());
 }
-#line 229 "./src/objects/statement.lzz"
+#line 231 "./src/objects/statement.lzz"
 void Statement::JS_pluck (v8::FunctionCallbackInfo <v8 :: Value> const & info)
-#line 229 "./src/objects/statement.lzz"
+#line 231 "./src/objects/statement.lzz"
                               {
                 Statement* stmt = node :: ObjectWrap :: Unwrap <Statement>(info.This());
                 if (!stmt->returns_data) return ThrowTypeError("The pluck() method is only for statements that return data");
@@ -1096,9 +1098,9 @@ void Statement::JS_pluck (v8::FunctionCallbackInfo <v8 :: Value> const & info)
                 stmt->mode = use ? Data::PLUCK : stmt->mode == Data::PLUCK ? Data::FLAT : stmt->mode;
                 info.GetReturnValue().Set(info.This());
 }
-#line 240 "./src/objects/statement.lzz"
+#line 242 "./src/objects/statement.lzz"
 void Statement::JS_expand (v8::FunctionCallbackInfo <v8 :: Value> const & info)
-#line 240 "./src/objects/statement.lzz"
+#line 242 "./src/objects/statement.lzz"
                                {
                 Statement* stmt = node :: ObjectWrap :: Unwrap <Statement>(info.This());
                 if (!stmt->returns_data) return ThrowTypeError("The expand() method is only for statements that return data");
@@ -1109,9 +1111,9 @@ void Statement::JS_expand (v8::FunctionCallbackInfo <v8 :: Value> const & info)
                 stmt->mode = use ? Data::EXPAND : stmt->mode == Data::EXPAND ? Data::FLAT : stmt->mode;
                 info.GetReturnValue().Set(info.This());
 }
-#line 251 "./src/objects/statement.lzz"
+#line 253 "./src/objects/statement.lzz"
 void Statement::JS_raw (v8::FunctionCallbackInfo <v8 :: Value> const & info)
-#line 251 "./src/objects/statement.lzz"
+#line 253 "./src/objects/statement.lzz"
                             {
                 Statement* stmt = node :: ObjectWrap :: Unwrap <Statement>(info.This());
                 if (!stmt->returns_data) return ThrowTypeError("The raw() method is only for statements that return data");
@@ -1122,9 +1124,9 @@ void Statement::JS_raw (v8::FunctionCallbackInfo <v8 :: Value> const & info)
                 stmt->mode = use ? Data::RAW : stmt->mode == Data::RAW ? Data::FLAT : stmt->mode;
                 info.GetReturnValue().Set(info.This());
 }
-#line 262 "./src/objects/statement.lzz"
+#line 264 "./src/objects/statement.lzz"
 void Statement::JS_safeIntegers (v8::FunctionCallbackInfo <v8 :: Value> const & info)
-#line 262 "./src/objects/statement.lzz"
+#line 264 "./src/objects/statement.lzz"
                                      {
                 Statement* stmt = node :: ObjectWrap :: Unwrap <Statement>(info.This());
                 if ( stmt -> db -> GetState ( ) -> busy ) return ThrowTypeError ( "This database connection is busy executing a query" ) ;
@@ -1133,9 +1135,9 @@ void Statement::JS_safeIntegers (v8::FunctionCallbackInfo <v8 :: Value> const & 
                 else { if ( info . Length ( ) <= ( 0 ) || ! info [ 0 ] -> IsBoolean ( ) ) return ThrowTypeError ( "Expected " "first" " argument to be " "a boolean" ) ; stmt -> safe_ints = ( info [ 0 ] . As < v8 :: Boolean > ( ) ) -> Value ( ) ; }
                 info.GetReturnValue().Set(info.This());
 }
-#line 271 "./src/objects/statement.lzz"
+#line 273 "./src/objects/statement.lzz"
 void Statement::JS_columns (v8::FunctionCallbackInfo <v8 :: Value> const & info)
-#line 271 "./src/objects/statement.lzz"
+#line 273 "./src/objects/statement.lzz"
                                 {
                 Statement* stmt = node :: ObjectWrap :: Unwrap <Statement>(info.This());
                 if (!stmt->returns_data) return ThrowTypeError("The columns() method is only for statements that return data");
@@ -1178,9 +1180,9 @@ void Statement::JS_columns (v8::FunctionCallbackInfo <v8 :: Value> const & info)
 
                 info.GetReturnValue().Set(columns);
 }
-#line 314 "./src/objects/statement.lzz"
+#line 316 "./src/objects/statement.lzz"
 void Statement::JS_busy (v8::FunctionCallbackInfo <v8 :: Value> const & info)
-#line 314 "./src/objects/statement.lzz"
+#line 316 "./src/objects/statement.lzz"
                              {
                 Statement* stmt = node :: ObjectWrap :: Unwrap <Statement>(info.This());
                 info.GetReturnValue().Set(stmt->alive && stmt->locked);
@@ -1276,34 +1278,35 @@ void StatementIterator::Next (v8::FunctionCallbackInfo <v8 :: Value> const & inf
                 int status = sqlite3_step(handle);
                 db_state->busy = false;
                 if (status == SQLITE_ROW) {
+                        std::vector<v8::Local<v8::Name> > keys;
                         v8 :: Isolate * isolate = info . GetIsolate ( ) ;
                         v8 :: Local < v8 :: Context > ctx = isolate -> GetCurrentContext ( ) ;
                         info.GetReturnValue().Set(
-                                NewRecord(isolate, ctx, Data::GetRowJS(isolate, ctx, handle, safe_ints, mode), db_state->addon, false)
+                                NewRecord(isolate, ctx, Data::GetRowJS(isolate, ctx, handle, safe_ints, mode, keys), db_state->addon, false)
                         );
                 } else {
                         if (status == SQLITE_DONE) Return(info);
                         else Throw();
                 }
 }
-#line 100 "./src/objects/statement-iterator.lzz"
+#line 101 "./src/objects/statement-iterator.lzz"
 void StatementIterator::Return (v8::FunctionCallbackInfo <v8 :: Value> const & info)
-#line 100 "./src/objects/statement-iterator.lzz"
+#line 101 "./src/objects/statement-iterator.lzz"
                                          {
                 Cleanup();
                 info . GetReturnValue ( ) . Set ( DoneRecord ( info . GetIsolate ( ) , db_state -> addon ) ) ; if ( ! bound ) { sqlite3_clear_bindings ( handle ) ; } return ;
 }
-#line 105 "./src/objects/statement-iterator.lzz"
+#line 106 "./src/objects/statement-iterator.lzz"
 void StatementIterator::Throw ()
-#line 105 "./src/objects/statement-iterator.lzz"
+#line 106 "./src/objects/statement-iterator.lzz"
                      {
                 Cleanup();
                 Database* db = stmt->db;
                 db -> ThrowDatabaseError ( ) ; if ( ! bound ) { sqlite3_clear_bindings ( handle ) ; } return ;
 }
-#line 111 "./src/objects/statement-iterator.lzz"
+#line 112 "./src/objects/statement-iterator.lzz"
 void StatementIterator::Cleanup ()
-#line 111 "./src/objects/statement-iterator.lzz"
+#line 112 "./src/objects/statement-iterator.lzz"
                        {
                 assert(alive == true);
                 alive = false;
@@ -2099,29 +2102,34 @@ namespace Data
 namespace Data
 {
 #line 80 "./src/util/data.lzz"
-  v8::Local <v8::Value> GetFlatRowJS (v8::Isolate * isolate, v8::Local <v8::Context> ctx, sqlite3_stmt * handle, bool safe_ints)
+  v8::Local <v8::Value> GetFlatRowJS (v8::Isolate * isolate, v8::Local <v8::Context> ctx, sqlite3_stmt * handle, bool safe_ints, std::vector <v8::Local<v8::Name> > & keys)
 #line 80 "./src/util/data.lzz"
-                                                                                                                                  {
-                int column_count = sqlite3_column_count(handle);
-                std::vector<v8::Local<v8::Name>> keys;
-                std::vector<v8::Local<v8::Value>> values;
-                keys.reserve(column_count);
-                values.reserve(column_count);
+                                                                                                                                                                           {
 
-                for (int i = 0; i < column_count; ++i) {
-                        keys.emplace_back(InternalizedFromUtf8(isolate, sqlite3_column_name(handle, i), -1));
+                if (keys.size() == 0) {
+                        int column_count = sqlite3_column_count(handle);
+                        keys.reserve(column_count);
+                        for (int i = 0; i < column_count; ++i) {
+                                keys.emplace_back(InternalizedFromUtf8(isolate, sqlite3_column_name(handle, i), -1));
+                        }
+                }
+
+                std::vector<v8::Local<v8::Value>> values;
+                values.reserve(keys.size());
+
+                for (size_t i = 0; i < keys.size(); ++i) {
                         values.emplace_back(Data::GetValueJS(isolate, handle, i, safe_ints));
                 }
 
-                return v8::Object::New(isolate, v8::Null(isolate), keys.data(), values.data(), column_count);
+                return v8::Object::New(isolate, v8::Null(isolate), keys.data(), values.data(), keys.size());
   }
 }
 #line 65 "./src/util/data.lzz"
 namespace Data
 {
-#line 95 "./src/util/data.lzz"
+#line 100 "./src/util/data.lzz"
   v8::Local <v8::Value> GetExpandedRowJS (v8::Isolate * isolate, v8::Local <v8::Context> ctx, sqlite3_stmt * handle, bool safe_ints)
-#line 95 "./src/util/data.lzz"
+#line 100 "./src/util/data.lzz"
                                                                                                                                       {
                 v8::Local<v8::Object> row = v8::Object::New(isolate);
                 int column_count = sqlite3_column_count(handle);
@@ -2144,9 +2152,9 @@ namespace Data
 #line 65 "./src/util/data.lzz"
 namespace Data
 {
-#line 114 "./src/util/data.lzz"
+#line 119 "./src/util/data.lzz"
   v8::Local <v8::Value> GetRawRowJS (v8::Isolate * isolate, v8::Local <v8::Context> ctx, sqlite3_stmt * handle, bool safe_ints)
-#line 114 "./src/util/data.lzz"
+#line 119 "./src/util/data.lzz"
                                                                                                                                  {
                 v8::Local<v8::Array> row = v8::Array::New(isolate);
                 int column_count = sqlite3_column_count(handle);
@@ -2159,11 +2167,11 @@ namespace Data
 #line 65 "./src/util/data.lzz"
 namespace Data
 {
-#line 123 "./src/util/data.lzz"
-  v8::Local <v8::Value> GetRowJS (v8::Isolate * isolate, v8::Local <v8::Context> ctx, sqlite3_stmt * handle, bool safe_ints, char mode)
-#line 123 "./src/util/data.lzz"
-                                                                                                                                         {
-                if (mode == FLAT) return GetFlatRowJS(isolate, ctx, handle, safe_ints);
+#line 128 "./src/util/data.lzz"
+  v8::Local <v8::Value> GetRowJS (v8::Isolate * isolate, v8::Local <v8::Context> ctx, sqlite3_stmt * handle, bool safe_ints, char mode, std::vector <v8::Local<v8::Name> > & keys)
+#line 128 "./src/util/data.lzz"
+                                                                                                                                                                                  {
+                if (mode == FLAT) return GetFlatRowJS(isolate, ctx, handle, safe_ints, keys);
                 if (mode == PLUCK) return GetValueJS(isolate, handle, 0, safe_ints);
                 if (mode == EXPAND) return GetExpandedRowJS(isolate, ctx, handle, safe_ints);
                 if (mode == RAW) return GetRawRowJS(isolate, ctx, handle, safe_ints);
@@ -2174,9 +2182,9 @@ namespace Data
 #line 65 "./src/util/data.lzz"
 namespace Data
 {
-#line 132 "./src/util/data.lzz"
+#line 137 "./src/util/data.lzz"
   void GetArgumentsJS (v8::Isolate * isolate, v8::Local <v8::Value> * out, sqlite3_value * * values, int argument_count, bool safe_ints)
-#line 132 "./src/util/data.lzz"
+#line 137 "./src/util/data.lzz"
                                                                                                                                          {
                 assert(argument_count > 0);
                 for (int i = 0; i < argument_count; ++i) {
@@ -2187,9 +2195,9 @@ namespace Data
 #line 65 "./src/util/data.lzz"
 namespace Data
 {
-#line 139 "./src/util/data.lzz"
+#line 144 "./src/util/data.lzz"
   int BindValueFromJS (v8::Isolate * isolate, sqlite3_stmt * handle, int index, v8::Local <v8::Value> value)
-#line 139 "./src/util/data.lzz"
+#line 144 "./src/util/data.lzz"
                                                                                                                {
                 if ( value -> IsNumber ( ) ) { return sqlite3_bind_double ( handle , index , value . As < v8 :: Number > ( ) -> Value ( ) ) ; } else if ( value -> IsBigInt ( ) ) { bool lossless ; int64_t v = value . As < v8 :: BigInt > ( ) -> Int64Value ( & lossless ) ; if ( lossless ) { return sqlite3_bind_int64 ( handle , index , v ) ; } } else if ( value -> IsString ( ) ) { v8 :: String :: Utf8Value utf8 ( isolate , value . As < v8 :: String > ( ) ) ; return sqlite3_bind_text ( handle , index , * utf8 , utf8 . length ( ) , SQLITE_TRANSIENT ) ; } else if ( node :: Buffer :: HasInstance ( value ) ) { const char * data = node :: Buffer :: Data ( value ) ; return sqlite3_bind_blob ( handle , index , data ? data : "" , node :: Buffer :: Length ( value ) , SQLITE_TRANSIENT ) ; } else if ( value -> IsNull ( ) || value -> IsUndefined ( ) ) { return sqlite3_bind_null ( handle , index ) ; } ;
                 return value->IsBigInt() ? SQLITE_TOOBIG : -1;
@@ -2198,9 +2206,9 @@ namespace Data
 #line 65 "./src/util/data.lzz"
 namespace Data
 {
-#line 144 "./src/util/data.lzz"
+#line 149 "./src/util/data.lzz"
   void ResultValueFromJS (v8::Isolate * isolate, sqlite3_context * invocation, v8::Local <v8::Value> value, DataConverter * converter)
-#line 144 "./src/util/data.lzz"
+#line 149 "./src/util/data.lzz"
                                                                                                                                         {
                 if ( value -> IsNumber ( ) ) { return sqlite3_result_double ( invocation , value . As < v8 :: Number > ( ) -> Value ( ) ) ; } else if ( value -> IsBigInt ( ) ) { bool lossless ; int64_t v = value . As < v8 :: BigInt > ( ) -> Int64Value ( & lossless ) ; if ( lossless ) { return sqlite3_result_int64 ( invocation , v ) ; } } else if ( value -> IsString ( ) ) { v8 :: String :: Utf8Value utf8 ( isolate , value . As < v8 :: String > ( ) ) ; return sqlite3_result_text ( invocation , * utf8 , utf8 . length ( ) , SQLITE_TRANSIENT ) ; } else if ( node :: Buffer :: HasInstance ( value ) ) { const char * data = node :: Buffer :: Data ( value ) ; return sqlite3_result_blob ( invocation , data ? data : "" , node :: Buffer :: Length ( value ) , SQLITE_TRANSIENT ) ; } else if ( value -> IsNull ( ) || value -> IsUndefined ( ) ) { return sqlite3_result_null ( invocation ) ; } ;
                 converter->ThrowDataConversionError(invocation, value->IsBigInt());

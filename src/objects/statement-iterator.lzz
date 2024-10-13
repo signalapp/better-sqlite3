@@ -86,10 +86,11 @@ private:
 		int status = sqlite3_step(handle);
 		db_state->busy = false;
 		if (status == SQLITE_ROW) {
+			std::vector<v8::Local<v8::Name> > keys;
 			UseIsolate;
 			UseContext;
 			info.GetReturnValue().Set(
-				NewRecord(isolate, ctx, Data::GetRowJS(isolate, ctx, handle, safe_ints, mode), db_state->addon, false)
+				NewRecord(isolate, ctx, Data::GetRowJS(isolate, ctx, handle, safe_ints, mode, keys), db_state->addon, false)
 			);
 		} else {
 			if (status == SQLITE_DONE) Return(info);

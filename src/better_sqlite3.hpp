@@ -358,43 +358,43 @@ private:
   static void JS_run (v8::FunctionCallbackInfo <v8 :: Value> const & info);
 #line 172 "./src/objects/statement.lzz"
   static void JS_get (v8::FunctionCallbackInfo <v8 :: Value> const & info);
-#line 187 "./src/objects/statement.lzz"
+#line 188 "./src/objects/statement.lzz"
   static void JS_all (v8::FunctionCallbackInfo <v8 :: Value> const & info);
-#line 208 "./src/objects/statement.lzz"
+#line 210 "./src/objects/statement.lzz"
   static void JS_iterate (v8::FunctionCallbackInfo <v8 :: Value> const & info);
-#line 218 "./src/objects/statement.lzz"
+#line 220 "./src/objects/statement.lzz"
   static void JS_bind (v8::FunctionCallbackInfo <v8 :: Value> const & info);
-#line 229 "./src/objects/statement.lzz"
+#line 231 "./src/objects/statement.lzz"
   static void JS_pluck (v8::FunctionCallbackInfo <v8 :: Value> const & info);
-#line 240 "./src/objects/statement.lzz"
+#line 242 "./src/objects/statement.lzz"
   static void JS_expand (v8::FunctionCallbackInfo <v8 :: Value> const & info);
-#line 251 "./src/objects/statement.lzz"
+#line 253 "./src/objects/statement.lzz"
   static void JS_raw (v8::FunctionCallbackInfo <v8 :: Value> const & info);
-#line 262 "./src/objects/statement.lzz"
+#line 264 "./src/objects/statement.lzz"
   static void JS_safeIntegers (v8::FunctionCallbackInfo <v8 :: Value> const & info);
-#line 271 "./src/objects/statement.lzz"
+#line 273 "./src/objects/statement.lzz"
   static void JS_columns (v8::FunctionCallbackInfo <v8 :: Value> const & info);
-#line 314 "./src/objects/statement.lzz"
+#line 316 "./src/objects/statement.lzz"
   static void JS_busy (v8::FunctionCallbackInfo <v8 :: Value> const & info);
-#line 319 "./src/objects/statement.lzz"
-  Database * const db;
-#line 320 "./src/objects/statement.lzz"
-  sqlite3_stmt * const handle;
 #line 321 "./src/objects/statement.lzz"
-  Extras * const extras;
+  Database * const db;
 #line 322 "./src/objects/statement.lzz"
-  bool alive;
+  sqlite3_stmt * const handle;
 #line 323 "./src/objects/statement.lzz"
-  bool locked;
+  Extras * const extras;
 #line 324 "./src/objects/statement.lzz"
-  bool bound;
+  bool alive;
 #line 325 "./src/objects/statement.lzz"
-  bool has_bind_map;
+  bool locked;
 #line 326 "./src/objects/statement.lzz"
-  bool safe_ints;
+  bool bound;
 #line 327 "./src/objects/statement.lzz"
-  char mode;
+  bool has_bind_map;
 #line 328 "./src/objects/statement.lzz"
+  bool safe_ints;
+#line 329 "./src/objects/statement.lzz"
+  char mode;
+#line 330 "./src/objects/statement.lzz"
   bool const returns_data;
 };
 #line 1 "./src/objects/statement-iterator.lzz"
@@ -420,31 +420,31 @@ private:
   static void JS_symbolIterator (v8::FunctionCallbackInfo <v8 :: Value> const & info);
 #line 75 "./src/objects/statement-iterator.lzz"
   void Next (v8::FunctionCallbackInfo <v8 :: Value> const & info);
-#line 100 "./src/objects/statement-iterator.lzz"
+#line 101 "./src/objects/statement-iterator.lzz"
   void Return (v8::FunctionCallbackInfo <v8 :: Value> const & info);
-#line 105 "./src/objects/statement-iterator.lzz"
+#line 106 "./src/objects/statement-iterator.lzz"
   void Throw ();
-#line 111 "./src/objects/statement-iterator.lzz"
+#line 112 "./src/objects/statement-iterator.lzz"
   void Cleanup ();
-#line 119 "./src/objects/statement-iterator.lzz"
+#line 120 "./src/objects/statement-iterator.lzz"
   static v8::Local <v8::Object> NewRecord (v8::Isolate * isolate, v8::Local <v8::Context> ctx, v8::Local <v8::Value> value, Addon * addon, bool done);
-#line 126 "./src/objects/statement-iterator.lzz"
+#line 127 "./src/objects/statement-iterator.lzz"
   static v8::Local <v8::Object> DoneRecord (v8::Isolate * isolate, Addon * addon);
-#line 130 "./src/objects/statement-iterator.lzz"
-  Statement * const stmt;
 #line 131 "./src/objects/statement-iterator.lzz"
-  sqlite3_stmt * const handle;
+  Statement * const stmt;
 #line 132 "./src/objects/statement-iterator.lzz"
-  Database::State * const db_state;
+  sqlite3_stmt * const handle;
 #line 133 "./src/objects/statement-iterator.lzz"
-  bool const bound;
+  Database::State * const db_state;
 #line 134 "./src/objects/statement-iterator.lzz"
-  bool const safe_ints;
+  bool const bound;
 #line 135 "./src/objects/statement-iterator.lzz"
-  char const mode;
+  bool const safe_ints;
 #line 136 "./src/objects/statement-iterator.lzz"
-  bool alive;
+  char const mode;
 #line 137 "./src/objects/statement-iterator.lzz"
+  bool alive;
+#line 138 "./src/objects/statement-iterator.lzz"
   bool logged;
 };
 #line 1 "./src/objects/backup.lzz"
@@ -777,42 +777,42 @@ namespace Data
 namespace Data
 {
 #line 80 "./src/util/data.lzz"
-  v8::Local <v8::Value> GetFlatRowJS (v8::Isolate * isolate, v8::Local <v8::Context> ctx, sqlite3_stmt * handle, bool safe_ints);
+  v8::Local <v8::Value> GetFlatRowJS (v8::Isolate * isolate, v8::Local <v8::Context> ctx, sqlite3_stmt * handle, bool safe_ints, std::vector <v8::Local<v8::Name> > & keys);
 }
 #line 65 "./src/util/data.lzz"
 namespace Data
 {
-#line 95 "./src/util/data.lzz"
+#line 100 "./src/util/data.lzz"
   v8::Local <v8::Value> GetExpandedRowJS (v8::Isolate * isolate, v8::Local <v8::Context> ctx, sqlite3_stmt * handle, bool safe_ints);
 }
 #line 65 "./src/util/data.lzz"
 namespace Data
 {
-#line 114 "./src/util/data.lzz"
+#line 119 "./src/util/data.lzz"
   v8::Local <v8::Value> GetRawRowJS (v8::Isolate * isolate, v8::Local <v8::Context> ctx, sqlite3_stmt * handle, bool safe_ints);
 }
 #line 65 "./src/util/data.lzz"
 namespace Data
 {
-#line 123 "./src/util/data.lzz"
-  v8::Local <v8::Value> GetRowJS (v8::Isolate * isolate, v8::Local <v8::Context> ctx, sqlite3_stmt * handle, bool safe_ints, char mode);
+#line 128 "./src/util/data.lzz"
+  v8::Local <v8::Value> GetRowJS (v8::Isolate * isolate, v8::Local <v8::Context> ctx, sqlite3_stmt * handle, bool safe_ints, char mode, std::vector <v8::Local<v8::Name> > & keys);
 }
 #line 65 "./src/util/data.lzz"
 namespace Data
 {
-#line 132 "./src/util/data.lzz"
+#line 137 "./src/util/data.lzz"
   void GetArgumentsJS (v8::Isolate * isolate, v8::Local <v8::Value> * out, sqlite3_value * * values, int argument_count, bool safe_ints);
 }
 #line 65 "./src/util/data.lzz"
 namespace Data
 {
-#line 139 "./src/util/data.lzz"
+#line 144 "./src/util/data.lzz"
   int BindValueFromJS (v8::Isolate * isolate, sqlite3_stmt * handle, int index, v8::Local <v8::Value> value);
 }
 #line 65 "./src/util/data.lzz"
 namespace Data
 {
-#line 144 "./src/util/data.lzz"
+#line 149 "./src/util/data.lzz"
   void ResultValueFromJS (v8::Isolate * isolate, sqlite3_context * invocation, v8::Local <v8::Value> value, DataConverter * converter);
 }
 #line 1 "./src/util/binder.lzz"
@@ -1014,18 +1014,18 @@ LZZ_INLINE bool Statement::Compare (Statement const * const a, Statement const *
                                                                                          {
                 return a->extras->id < b->extras->id;
 }
-#line 119 "./src/objects/statement-iterator.lzz"
+#line 120 "./src/objects/statement-iterator.lzz"
 LZZ_INLINE v8::Local <v8::Object> StatementIterator::NewRecord (v8::Isolate * isolate, v8::Local <v8::Context> ctx, v8::Local <v8::Value> value, Addon * addon, bool done)
-#line 119 "./src/objects/statement-iterator.lzz"
+#line 120 "./src/objects/statement-iterator.lzz"
                                                                                                                                                              {
                 v8::Local<v8::Object> record = v8::Object::New(isolate);
                 record->Set(ctx, addon->cs.value.Get(isolate), value).FromJust();
                 record->Set(ctx, addon->cs.done.Get(isolate), v8::Boolean::New(isolate, done)).FromJust();
                 return record;
 }
-#line 126 "./src/objects/statement-iterator.lzz"
+#line 127 "./src/objects/statement-iterator.lzz"
 LZZ_INLINE v8::Local <v8::Object> StatementIterator::DoneRecord (v8::Isolate * isolate, Addon * addon)
-#line 126 "./src/objects/statement-iterator.lzz"
+#line 127 "./src/objects/statement-iterator.lzz"
                                                                                            {
                 return NewRecord(isolate, isolate -> GetCurrentContext ( ) , v8::Undefined(isolate), addon, true);
 }
