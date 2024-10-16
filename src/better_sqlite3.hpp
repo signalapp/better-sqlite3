@@ -208,11 +208,6 @@ class Database : public node::ObjectWrap {
   static void JS_open(v8::FunctionCallbackInfo<v8 ::Value> const& info);
   static void JS_inTransaction(
       v8::FunctionCallbackInfo<v8 ::Value> const& info);
-  static bool Deserialize(v8::Local<v8::Object> buffer,
-                          Addon* addon,
-                          sqlite3* db_handle,
-                          bool readonly);
-  static void FreeSerialization(char* data, void* _);
   static int const MAX_BUFFER_SIZE =
       node::Buffer::kMaxLength > INT_MAX
           ? INT_MAX

@@ -487,12 +487,6 @@ void Database::JS_new(v8::FunctionCallbackInfo<v8 ::Value> const& info) {
         "seventh"
         " argument");
   v8 ::Local<v8 ::Value> logger = info[6];
-  if (info.Length() <= (7))
-    return ThrowTypeError(
-        "Expected a "
-        "eighth"
-        " argument");
-  v8 ::Local<v8 ::Value> buffer = info[7];
 
   Addon* addon = static_cast<Addon*>(info.Data().As<v8 ::External>()->Value());
   v8 ::Isolate* isolate = info.GetIsolate();
@@ -519,14 +513,6 @@ void Database::JS_new(v8::FunctionCallbackInfo<v8 ::Value> const& info) {
   sqlite3_limit(db_handle, SQLITE_LIMIT_SQL_LENGTH, MAX_STRING_SIZE);
   int status = sqlite3_db_config(db_handle, SQLITE_DBCONFIG_DEFENSIVE, 1, NULL);
   assert(status == SQLITE_OK);
-
-  if (node::Buffer::HasInstance(buffer) &&
-      !Deserialize(buffer.As<v8::Object>(), addon, db_handle, readonly)) {
-    int status = sqlite3_close(db_handle);
-    assert(status == SQLITE_OK);
-    ((void)status);
-    return;
-  }
 
   v8 ::Local<v8 ::Context> ctx = isolate->GetCurrentContext();
   Database* db = new Database(isolate, addon, db_handle, logger);
@@ -1012,41 +998,6 @@ void Database::JS_inTransaction(
   Database* db = node ::ObjectWrap ::Unwrap<Database>(info.This());
   info.GetReturnValue().Set(
       db->open && !static_cast<bool>(sqlite3_get_autocommit(db->db_handle)));
-}
-bool Database::Deserialize(v8::Local<v8::Object> buffer,
-                           Addon* addon,
-                           sqlite3* db_handle,
-                           bool readonly) {
-  size_t length = node::Buffer::Length(buffer);
-  unsigned char* data = (unsigned char*)sqlite3_malloc64(length);
-  unsigned int flags =
-      SQLITE_DESERIALIZE_FREEONCLOSE | SQLITE_DESERIALIZE_RESIZEABLE;
-
-  if (readonly) {
-    flags |= SQLITE_DESERIALIZE_READONLY;
-  }
-  if (length) {
-    if (!data) {
-      ThrowError("Out of memory");
-      return false;
-    }
-    memcpy(data, node::Buffer::Data(buffer), length);
-  }
-
-  int status =
-      sqlite3_deserialize(db_handle, "main", data, length, length, flags);
-  if (status != SQLITE_OK) {
-    ThrowSqliteError(addon,
-                     status == SQLITE_ERROR ? "unable to deserialize database"
-                                            : sqlite3_errstr(status),
-                     status);
-    return false;
-  }
-
-  return true;
-}
-void Database::FreeSerialization(char* data, void* _) {
-  sqlite3_free(data);
 }
 int const Database::MAX_BUFFER_SIZE;
 int const Database::MAX_STRING_SIZE;
