@@ -24,6 +24,7 @@
     "tar": "^6.1.0"
   },
   "devDependencies": {
+    "axios": "^1.4.0",
     "chai": "^4.3.6",
     "cli-color": "^2.0.2",
     "fs-extra": "^10.1.0",
