@@ -73,6 +73,10 @@
           'GCC_GENERATE_DEBUGGING_SYMBOLS': 'NO',
           'DEAD_CODE_STRIPPING': 'YES',
           'GCC_INLINES_ARE_PRIVATE_EXTERN': 'YES',
+          'OTHER_CPLUSPLUSFLAGS': ['-std=c++20', '-stdlib=libc++'],
+          'GCC_ENABLE_CPP_EXCEPTIONS': 'NO',
+          'GCC_SYMBOLS_PRIVATE_EXTERN': 'YES', # -fvisibility=hidden
+          'LLVM_LTO': 'YES',
         },
       },
     },

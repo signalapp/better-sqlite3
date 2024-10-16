@@ -10,12 +10,6 @@
       'dependencies': ['deps/sqlite3.gyp:sqlite3'],
       'sources': ['src/better_sqlite3.cpp'],
       'cflags_cc': ['-std=c++20'],
-      'xcode_settings': {
-        'OTHER_CPLUSPLUSFLAGS': ['-std=c++20', '-stdlib=libc++'],
-        'GCC_ENABLE_CPP_EXCEPTIONS': 'NO',
-        'GCC_SYMBOLS_PRIVATE_EXTERN': 'YES', # -fvisibility=hidden
-        'LLVM_LTO': 'YES',
-      },
       'msvs_settings': {
         'VCCLCompilerTool': {
           'AdditionalOptions': [
