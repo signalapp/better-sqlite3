@@ -549,13 +549,9 @@ v8::Local<v8::Value> GetValueJS(v8::Isolate* isolate,
                                 sqlite3_stmt* handle,
                                 int column,
                                 bool safe_ints);
-}
-namespace Data {
 v8::Local<v8::Value> GetValueJS(v8::Isolate* isolate,
                                 sqlite3_value* value,
                                 bool safe_ints);
-}
-namespace Data {
 #ifdef V8_HAS_LOCAL_VECTOR
 v8::Local<v8::Value> GetFlatRowJS(v8::Isolate* isolate,
                                   v8::Local<v8::Context> ctx,
@@ -572,14 +568,10 @@ v8::Local<v8::Value> GetExpandedRowJS(v8::Isolate* isolate,
                                       v8::Local<v8::Context> ctx,
                                       sqlite3_stmt* handle,
                                       bool safe_ints);
-}
-namespace Data {
 v8::Local<v8::Value> GetRawRowJS(v8::Isolate* isolate,
                                  v8::Local<v8::Context> ctx,
                                  sqlite3_stmt* handle,
                                  bool safe_ints);
-}
-namespace Data {
 #ifdef V8_HAS_LOCAL_VECTOR
 v8::Local<v8::Value> GetRowJS(v8::Isolate* isolate,
                               v8::Local<v8::Context> ctx,
@@ -599,19 +591,15 @@ void GetArgumentsJS(v8::Isolate* isolate,
                     sqlite3_value** values,
                     int argument_count,
                     bool safe_ints);
-}
-namespace Data {
 int BindValueFromJS(v8::Isolate* isolate,
                     sqlite3_stmt* handle,
                     int index,
                     v8::Local<v8::Value> value);
-}
-namespace Data {
 void ResultValueFromJS(v8::Isolate* isolate,
                        sqlite3_context* invocation,
                        v8::Local<v8::Value> value,
                        DataConverter* converter);
-}
+}  // namespace Data
 class Binder {
  public:
   explicit Binder(sqlite3_stmt* _handle);

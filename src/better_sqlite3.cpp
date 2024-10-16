@@ -77,16 +77,10 @@ NODE_MODULE_INIT(/* exports, context */) {
 #define LZZ_INLINE inline
 namespace Data {
 static char const FLAT = 0;
-}
-namespace Data {
 static char const PLUCK = 1;
-}
-namespace Data {
 static char const EXPAND = 2;
-}
-namespace Data {
 static char const RAW = 3;
-}
+}  // namespace Data
 void ThrowError(char const* message) {
   v8 ::Isolate* isolate = v8 ::Isolate ::GetCurrent();
   isolate->ThrowException(
@@ -2569,8 +2563,6 @@ v8::Local<v8::Value> GetValueJS(v8::Isolate* isolate,
   assert(false);
   ;
 }
-}  // namespace Data
-namespace Data {
 v8::Local<v8::Value> GetValueJS(v8::Isolate* isolate,
                                 sqlite3_value* value,
                                 bool safe_ints) {
@@ -2597,8 +2589,6 @@ v8::Local<v8::Value> GetValueJS(v8::Isolate* isolate,
   assert(false);
   ;
 }
-}  // namespace Data
-namespace Data {
 #ifdef V8_HAS_LOCAL_VECTOR
 v8::Local<v8::Value> GetFlatRowJS(v8::Isolate* isolate,
                                   v8::Local<v8::Context> ctx,
@@ -2668,8 +2658,6 @@ v8::Local<v8::Value> GetExpandedRowJS(v8::Isolate* isolate,
   }
   return row;
 }
-}  // namespace Data
-namespace Data {
 v8::Local<v8::Value> GetRawRowJS(v8::Isolate* isolate,
                                  v8::Local<v8::Context> ctx,
                                  sqlite3_stmt* handle,
@@ -2682,8 +2670,6 @@ v8::Local<v8::Value> GetRawRowJS(v8::Isolate* isolate,
   }
   return row;
 }
-}  // namespace Data
-namespace Data {
 #ifdef V8_HAS_LOCAL_VECTOR
 v8::Local<v8::Value> GetRowJS(v8::Isolate* isolate,
                               v8::Local<v8::Context> ctx,
@@ -2711,8 +2697,6 @@ v8::Local<v8::Value> GetRowJS(v8::Isolate* isolate,
   assert(false);
   return v8::Local<v8::Value>();
 }
-}  // namespace Data
-namespace Data {
 void GetArgumentsJS(v8::Isolate* isolate,
                     v8::Local<v8::Value>* out,
                     sqlite3_value** values,
@@ -2723,8 +2707,6 @@ void GetArgumentsJS(v8::Isolate* isolate,
     out[i] = Data::GetValueJS(isolate, values[i], safe_ints);
   }
 }
-}  // namespace Data
-namespace Data {
 int BindValueFromJS(v8::Isolate* isolate,
                     sqlite3_stmt* handle,
                     int index,
@@ -2750,8 +2732,6 @@ int BindValueFromJS(v8::Isolate* isolate,
   };
   return value->IsBigInt() ? SQLITE_TOOBIG : -1;
 }
-}  // namespace Data
-namespace Data {
 void ResultValueFromJS(v8::Isolate* isolate,
                        sqlite3_context* invocation,
                        v8::Local<v8::Value> value,
