@@ -93,10 +93,12 @@
           }
         },
         'OS == "mac"', {
+          'defines': [
+            'SQLCIPHER_CRYPTO_CC',
+          ],
           'link_settings': {
             'libraries': [
               # This statically links libcrypto, whereas -lcrypto would dynamically link it
-              '<(SHARED_INTERMEDIATE_DIR)/sqlite3/OpenSSL-mac-<(target_arch)/libcrypto.a',
               '<(SHARED_INTERMEDIATE_DIR)/sqlite3/signal-tokenizer/>(rust_arch)-apple-darwin/libsignal_tokenizer.a',
             ]
           }

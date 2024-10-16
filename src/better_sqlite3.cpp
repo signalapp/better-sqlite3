@@ -310,7 +310,6 @@ v8::Local<v8 ::Function> Database::Init(v8::Isolate* isolate,
   SetPrototypeMethod(isolate, data, t, "prepare", JS_prepare);
   SetPrototypeMethod(isolate, data, t, "exec", JS_exec);
   SetPrototypeMethod(isolate, data, t, "backup", JS_backup);
-  SetPrototypeMethod(isolate, data, t, "serialize", JS_serialize);
   SetPrototypeMethod(isolate, data, t, "function", JS_function);
   SetPrototypeMethod(isolate, data, t, "aggregate", JS_aggregate);
   SetPrototypeMethod(isolate, data, t, "table", JS_table);
@@ -682,38 +681,6 @@ void Database::JS_backup(v8::FunctionCallbackInfo<v8 ::Value> const& info) {
   addon->privileged_info = NULL;
   if (!maybeBackup.IsEmpty())
     info.GetReturnValue().Set(maybeBackup.ToLocalChecked());
-}
-void Database::JS_serialize(v8::FunctionCallbackInfo<v8 ::Value> const& info) {
-  Database* db = node ::ObjectWrap ::Unwrap<Database>(info.This());
-  if (info.Length() <= (0) || !info[0]->IsString())
-    return ThrowTypeError(
-        "Expected "
-        "first"
-        " argument to be "
-        "a string");
-  v8 ::Local<v8 ::String> attachedName = (info[0].As<v8 ::String>());
-  if (!db->open)
-    return ThrowTypeError("The database connection is not open");
-  if (db->busy)
-    return ThrowTypeError("This database connection is busy executing a query");
-  if (db->iterators)
-    return ThrowTypeError("This database connection is busy executing a query");
-
-  v8 ::Isolate* isolate = info.GetIsolate();
-  v8::String::Utf8Value attached_name(isolate, attachedName);
-  sqlite3_int64 length = -1;
-  unsigned char* data =
-      sqlite3_serialize(db->db_handle, *attached_name, &length, 0);
-
-  if (!data && length) {
-    ThrowError("Out of memory");
-    return;
-  }
-
-  info.GetReturnValue().Set(node::Buffer::New(isolate,
-                                              reinterpret_cast<char*>(data),
-                                              length, FreeSerialization, NULL)
-                                .ToLocalChecked());
 }
 void Database::JS_function(v8::FunctionCallbackInfo<v8 ::Value> const& info) {
   Database* db = node ::ObjectWrap ::Unwrap<Database>(info.This());
