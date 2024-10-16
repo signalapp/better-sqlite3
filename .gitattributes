@@ -1,2 +1,5 @@
+*.lzz linguist-language=C++
+*.cpp -diff
+*.hpp -diff
 *.c -diff
 *.h -diff
