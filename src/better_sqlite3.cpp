@@ -1308,7 +1308,7 @@ void Statement::JS_get(v8::FunctionCallbackInfo<v8 ::Value> const& info) {
   int status = sqlite3_step(handle);
   if (status == SQLITE_ROW) {
 #ifdef V8_HAS_LOCAL_VECTOR
-    std::vector<v8::Local<v8::Name>> keys;
+    v8::LocalVector<v8::Name> keys(isolate);
     v8::Local<v8::Value> result =
         Data::GetRowJS(isolate, isolate->GetCurrentContext(), handle,
                        stmt->safe_ints, stmt->mode, keys);
@@ -1384,7 +1384,7 @@ void Statement::JS_all(v8::FunctionCallbackInfo<v8 ::Value> const& info) {
   const char mode = stmt->mode;
   bool js_error = false;
 #ifdef V8_HAS_LOCAL_VECTOR
-  std::vector<v8::Local<v8::Name>> keys;
+  v8::LocalVector<v8::Name> keys(isolate);
 #endif  // V8_HAS_LOCAL_VECTOR
 
   while (sqlite3_step(handle) == SQLITE_ROW) {
@@ -1726,7 +1726,7 @@ void StatementIterator::Next(v8::FunctionCallbackInfo<v8 ::Value> const& info) {
     v8 ::Isolate* isolate = info.GetIsolate();
     v8 ::Local<v8 ::Context> ctx = isolate->GetCurrentContext();
 #ifdef V8_HAS_LOCAL_VECTOR
-    std::vector<v8::Local<v8::Name>> keys;
+    v8::LocalVector<v8::Name> keys(isolate);
     v8::Local<v8::Value> row =
         Data::GetRowJS(isolate, ctx, handle, safe_ints, mode, keys);
 #else  // !V8_HAS_LOCAL_VECTOR
@@ -2520,7 +2520,7 @@ v8::Local<v8::Value> GetFlatRowJS(v8::Isolate* isolate,
                                   v8::Local<v8::Context> ctx,
                                   sqlite3_stmt* handle,
                                   bool safe_ints,
-                                  std::vector<v8::Local<v8::Name>>& keys) {
+                                  v8::LocalVector<v8::Name>& keys) {
   if (keys.size() == 0) {
     int column_count = sqlite3_column_count(handle);
     keys.reserve(column_count);
@@ -2530,7 +2530,7 @@ v8::Local<v8::Value> GetFlatRowJS(v8::Isolate* isolate,
     }
   }
 
-  std::vector<v8::Local<v8::Value>> values;
+  v8::LocalVector<v8::Value> values(isolate);
   values.reserve(keys.size());
 
   for (size_t i = 0; i < keys.size(); ++i) {
@@ -2602,7 +2602,7 @@ v8::Local<v8::Value> GetRowJS(v8::Isolate* isolate,
                               sqlite3_stmt* handle,
                               bool safe_ints,
                               char mode,
-                              std::vector<v8::Local<v8::Name>>& keys) {
+                              v8::LocalVector<v8::Name>& keys) {
   if (mode == FLAT)
     return GetFlatRowJS(isolate, ctx, handle, safe_ints, keys);
 #else  // !V8_HAS_LOCAL_VECTOR

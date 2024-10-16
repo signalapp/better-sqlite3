@@ -556,7 +556,7 @@ v8::Local<v8::Value> GetFlatRowJS(v8::Isolate* isolate,
                                   v8::Local<v8::Context> ctx,
                                   sqlite3_stmt* handle,
                                   bool safe_ints,
-                                  std::vector<v8::Local<v8::Name>>& keys);
+                                  v8::LocalVector<v8::Name>& keys);
 #else  // !V8_HAS_LOCAL_VECTOR
 v8::Local<v8::Value> GetFlatRowJS(v8::Isolate* isolate,
                                   v8::Local<v8::Context> ctx,
@@ -577,7 +577,7 @@ v8::Local<v8::Value> GetRowJS(v8::Isolate* isolate,
                               sqlite3_stmt* handle,
                               bool safe_ints,
                               char mode,
-                              std::vector<v8::Local<v8::Name>>& keys);
+                              v8::LocalVector<v8::Name>& keys);
 #else  // !V8_HAS_LOCAL_VECTOR
 v8::Local<v8::Value> GetRowJS(v8::Isolate* isolate,
                               v8::Local<v8::Context> ctx,
