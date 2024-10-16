@@ -77,16 +77,10 @@ NODE_MODULE_INIT(/* exports, context */) {
 #define LZZ_INLINE inline
 namespace Data {
 static char const FLAT = 0;
-}
-namespace Data {
 static char const PLUCK = 1;
-}
-namespace Data {
 static char const EXPAND = 2;
-}
-namespace Data {
 static char const RAW = 3;
-}
+}  // namespace Data
 void ThrowError(char const* message) {
   v8 ::Isolate* isolate = v8 ::Isolate ::GetCurrent();
   isolate->ThrowException(
@@ -320,7 +314,6 @@ v8::Local<v8 ::Function> Database::Init(v8::Isolate* isolate,
   SetPrototypeMethod(isolate, data, t, "function", JS_function);
   SetPrototypeMethod(isolate, data, t, "aggregate", JS_aggregate);
   SetPrototypeMethod(isolate, data, t, "table", JS_table);
-  SetPrototypeMethod(isolate, data, t, "loadExtension", JS_loadExtension);
   SetPrototypeMethod(isolate, data, t, "close", JS_close);
   SetPrototypeMethod(isolate, data, t, "defaultSafeIntegers",
                      JS_defaultSafeIntegers);
@@ -525,10 +518,7 @@ void Database::JS_new(v8::FunctionCallbackInfo<v8 ::Value> const& info) {
       db_handle, SQLITE_LIMIT_LENGTH,
       MAX_BUFFER_SIZE < MAX_STRING_SIZE ? MAX_BUFFER_SIZE : MAX_STRING_SIZE);
   sqlite3_limit(db_handle, SQLITE_LIMIT_SQL_LENGTH, MAX_STRING_SIZE);
-  int status = sqlite3_db_config(
-      db_handle, SQLITE_DBCONFIG_ENABLE_LOAD_EXTENSION, 1, NULL);
-  assert(status == SQLITE_OK);
-  status = sqlite3_db_config(db_handle, SQLITE_DBCONFIG_DEFENSIVE, 1, NULL);
+  int status = sqlite3_db_config(db_handle, SQLITE_DBCONFIG_DEFENSIVE, 1, NULL);
   assert(status == SQLITE_OK);
 
   if (node::Buffer::HasInstance(buffer) &&
@@ -924,43 +914,6 @@ void Database::JS_table(v8::FunctionCallbackInfo<v8 ::Value> const& info) {
     db->ThrowDatabaseError();
   }
   db->busy = false;
-}
-void Database::JS_loadExtension(
-    v8::FunctionCallbackInfo<v8 ::Value> const& info) {
-  Database* db = node ::ObjectWrap ::Unwrap<Database>(info.This());
-  v8::Local<v8::String> entryPoint;
-  if (info.Length() <= (0) || !info[0]->IsString())
-    return ThrowTypeError(
-        "Expected "
-        "first"
-        " argument to be "
-        "a string");
-  v8 ::Local<v8 ::String> filename = (info[0].As<v8 ::String>());
-  if (info.Length() > 1) {
-    if (info.Length() <= (1) || !info[1]->IsString())
-      return ThrowTypeError(
-          "Expected "
-          "second"
-          " argument to be "
-          "a string");
-    entryPoint = (info[1].As<v8 ::String>());
-  }
-  if (!db->open)
-    return ThrowTypeError("The database connection is not open");
-  if (db->busy)
-    return ThrowTypeError("This database connection is busy executing a query");
-  if (db->iterators)
-    return ThrowTypeError("This database connection is busy executing a query");
-  v8 ::Isolate* isolate = info.GetIsolate();
-  char* error;
-  int status = sqlite3_load_extension(
-      db->db_handle, *v8::String::Utf8Value(isolate, filename),
-      entryPoint.IsEmpty() ? NULL : *v8::String::Utf8Value(isolate, entryPoint),
-      &error);
-  if (status != SQLITE_OK) {
-    ThrowSqliteError(db->addon, error, status);
-  }
-  sqlite3_free(error);
 }
 void Database::JS_close(v8::FunctionCallbackInfo<v8 ::Value> const& info) {
   Database* db = node ::ObjectWrap ::Unwrap<Database>(info.This());
@@ -1387,10 +1340,16 @@ void Statement::JS_get(v8::FunctionCallbackInfo<v8 ::Value> const& info) {
   ((void)0);
   int status = sqlite3_step(handle);
   if (status == SQLITE_ROW) {
+#ifdef V8_HAS_LOCAL_VECTOR
     std::vector<v8::Local<v8::Name>> keys;
     v8::Local<v8::Value> result =
         Data::GetRowJS(isolate, isolate->GetCurrentContext(), handle,
                        stmt->safe_ints, stmt->mode, keys);
+#else  // !V8_HAS_LOCAL_VECTOR
+    v8::Local<v8::Value> result =
+        Data::GetRowJS(isolate, isolate->GetCurrentContext(), handle,
+                       stmt->safe_ints, stmt->mode);
+#endif
     sqlite3_reset(handle);
     db->GetState()->busy = false;
     info.GetReturnValue().Set(result);
@@ -1457,7 +1416,9 @@ void Statement::JS_all(v8::FunctionCallbackInfo<v8 ::Value> const& info) {
   const bool safe_ints = stmt->safe_ints;
   const char mode = stmt->mode;
   bool js_error = false;
+#ifdef V8_HAS_LOCAL_VECTOR
   std::vector<v8::Local<v8::Name>> keys;
+#endif  // V8_HAS_LOCAL_VECTOR
 
   while (sqlite3_step(handle) == SQLITE_ROW) {
     if (row_count == 0xffffffff) {
@@ -1465,10 +1426,14 @@ void Statement::JS_all(v8::FunctionCallbackInfo<v8 ::Value> const& info) {
       js_error = true;
       break;
     }
-    result
-        ->Set(ctx, row_count++,
-              Data::GetRowJS(isolate, ctx, handle, safe_ints, mode, keys))
-        .FromJust();
+#ifdef V8_HAS_LOCAL_VECTOR
+    v8::Local<v8::Value> row =
+        Data::GetRowJS(isolate, ctx, handle, safe_ints, mode, keys);
+#else  // !V8_HAS_LOCAL_VECTOR
+    v8::Local<v8::Value> row =
+        Data::GetRowJS(isolate, ctx, handle, safe_ints, mode);
+#endif
+    result->Set(ctx, row_count++, row).FromJust();
   }
 
   if (sqlite3_reset(handle) == SQLITE_OK && !js_error) {
@@ -1791,13 +1756,19 @@ void StatementIterator::Next(v8::FunctionCallbackInfo<v8 ::Value> const& info) {
   int status = sqlite3_step(handle);
   db_state->busy = false;
   if (status == SQLITE_ROW) {
-    std::vector<v8::Local<v8::Name>> keys;
     v8 ::Isolate* isolate = info.GetIsolate();
     v8 ::Local<v8 ::Context> ctx = isolate->GetCurrentContext();
+#ifdef V8_HAS_LOCAL_VECTOR
+    std::vector<v8::Local<v8::Name>> keys;
+    v8::Local<v8::Value> row =
+        Data::GetRowJS(isolate, ctx, handle, safe_ints, mode, keys);
+#else  // !V8_HAS_LOCAL_VECTOR
+    v8::Local<v8::Value> row =
+        Data::GetRowJS(isolate, ctx, handle, safe_ints, mode);
+#endif
+
     info.GetReturnValue().Set(
-        NewRecord(isolate, ctx,
-                  Data::GetRowJS(isolate, ctx, handle, safe_ints, mode, keys),
-                  db_state->addon, false));
+        NewRecord(isolate, ctx, row, db_state->addon, false));
   } else {
     if (status == SQLITE_DONE)
       Return(info);
@@ -2551,8 +2522,6 @@ v8::Local<v8::Value> GetValueJS(v8::Isolate* isolate,
   assert(false);
   ;
 }
-}  // namespace Data
-namespace Data {
 v8::Local<v8::Value> GetValueJS(v8::Isolate* isolate,
                                 sqlite3_value* value,
                                 bool safe_ints) {
@@ -2579,8 +2548,7 @@ v8::Local<v8::Value> GetValueJS(v8::Isolate* isolate,
   assert(false);
   ;
 }
-}  // namespace Data
-namespace Data {
+#ifdef V8_HAS_LOCAL_VECTOR
 v8::Local<v8::Value> GetFlatRowJS(v8::Isolate* isolate,
                                   v8::Local<v8::Context> ctx,
                                   sqlite3_stmt* handle,
@@ -2605,8 +2573,22 @@ v8::Local<v8::Value> GetFlatRowJS(v8::Isolate* isolate,
   return v8::Object::New(isolate, v8::Null(isolate), keys.data(), values.data(),
                          keys.size());
 }
-}  // namespace Data
-namespace Data {
+#else  // !V8_HAS_LOCAL_VECTOR
+v8::Local<v8::Value> GetFlatRowJS(v8::Isolate* isolate,
+                                  v8::Local<v8::Context> ctx,
+                                  sqlite3_stmt* handle,
+                                  bool safe_ints) {
+  v8::Local<v8::Object> row = v8::Object::New(isolate);
+  int column_count = sqlite3_column_count(handle);
+  for (int i = 0; i < column_count; ++i) {
+    row->Set(ctx,
+             InternalizedFromUtf8(isolate, sqlite3_column_name(handle, i), -1),
+             Data::GetValueJS(isolate, handle, i, safe_ints))
+        .FromJust();
+  }
+  return row;
+}
+#endif
 v8::Local<v8::Value> GetExpandedRowJS(v8::Isolate* isolate,
                                       v8::Local<v8::Context> ctx,
                                       sqlite3_stmt* handle,
@@ -2635,8 +2617,6 @@ v8::Local<v8::Value> GetExpandedRowJS(v8::Isolate* isolate,
   }
   return row;
 }
-}  // namespace Data
-namespace Data {
 v8::Local<v8::Value> GetRawRowJS(v8::Isolate* isolate,
                                  v8::Local<v8::Context> ctx,
                                  sqlite3_stmt* handle,
@@ -2649,8 +2629,7 @@ v8::Local<v8::Value> GetRawRowJS(v8::Isolate* isolate,
   }
   return row;
 }
-}  // namespace Data
-namespace Data {
+#ifdef V8_HAS_LOCAL_VECTOR
 v8::Local<v8::Value> GetRowJS(v8::Isolate* isolate,
                               v8::Local<v8::Context> ctx,
                               sqlite3_stmt* handle,
@@ -2659,6 +2638,15 @@ v8::Local<v8::Value> GetRowJS(v8::Isolate* isolate,
                               std::vector<v8::Local<v8::Name>>& keys) {
   if (mode == FLAT)
     return GetFlatRowJS(isolate, ctx, handle, safe_ints, keys);
+#else  // !V8_HAS_LOCAL_VECTOR
+v8::Local<v8::Value> GetRowJS(v8::Isolate* isolate,
+                              v8::Local<v8::Context> ctx,
+                              sqlite3_stmt* handle,
+                              bool safe_ints,
+                              char mode) {
+  if (mode == FLAT)
+    return GetFlatRowJS(isolate, ctx, handle, safe_ints);
+#endif
   if (mode == PLUCK)
     return GetValueJS(isolate, handle, 0, safe_ints);
   if (mode == EXPAND)
@@ -2668,8 +2656,6 @@ v8::Local<v8::Value> GetRowJS(v8::Isolate* isolate,
   assert(false);
   return v8::Local<v8::Value>();
 }
-}  // namespace Data
-namespace Data {
 void GetArgumentsJS(v8::Isolate* isolate,
                     v8::Local<v8::Value>* out,
                     sqlite3_value** values,
@@ -2680,8 +2666,6 @@ void GetArgumentsJS(v8::Isolate* isolate,
     out[i] = Data::GetValueJS(isolate, values[i], safe_ints);
   }
 }
-}  // namespace Data
-namespace Data {
 int BindValueFromJS(v8::Isolate* isolate,
                     sqlite3_stmt* handle,
                     int index,
@@ -2707,8 +2691,6 @@ int BindValueFromJS(v8::Isolate* isolate,
   };
   return value->IsBigInt() ? SQLITE_TOOBIG : -1;
 }
-}  // namespace Data
-namespace Data {
 void ResultValueFromJS(v8::Isolate* isolate,
                        sqlite3_context* invocation,
                        v8::Local<v8::Value> value,

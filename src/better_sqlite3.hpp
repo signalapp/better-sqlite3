@@ -17,9 +17,22 @@
 #include <unordered_map>
 #include <vector>
 #include "signal-tokenizer.h"
+
+// See: https://github.com/v8/v8/commit/e1649301dfbfd34a448c3a0232c8a6206b716c73
+// Required V8 verison: 12.0.54 or higher
+
+#if V8_MAJOR_VERSION > 12 ||     \
+    V8_MINOR_VERSION == 12 &&    \
+        (V8_MINOR_VERSION > 0 || \
+         V8_MINOR_VERSION == 0 && V8_PATCH_VERSION >= 54)
+#define V8_HAS_LOCAL_VECTOR
+#endif
+
 template <class T>
 using CopyablePersistent = v8::Global<T>;
+
 static bool IsPlainObject(v8::Isolate* isolate, v8::Local<v8::Object> obj);
+
 #define LZZ_INLINE inline
 v8::Local<v8::String> StringFromUtf8(v8::Isolate* isolate,
                                      char const* data,
@@ -181,8 +194,6 @@ class Database : public node::ObjectWrap {
   static void JS_function(v8::FunctionCallbackInfo<v8 ::Value> const& info);
   static void JS_aggregate(v8::FunctionCallbackInfo<v8 ::Value> const& info);
   static void JS_table(v8::FunctionCallbackInfo<v8 ::Value> const& info);
-  static void JS_loadExtension(
-      v8::FunctionCallbackInfo<v8 ::Value> const& info);
   static void JS_close(v8::FunctionCallbackInfo<v8 ::Value> const& info);
   static void JS_defaultSafeIntegers(
       v8::FunctionCallbackInfo<v8 ::Value> const& info);
@@ -538,58 +549,57 @@ v8::Local<v8::Value> GetValueJS(v8::Isolate* isolate,
                                 sqlite3_stmt* handle,
                                 int column,
                                 bool safe_ints);
-}
-namespace Data {
 v8::Local<v8::Value> GetValueJS(v8::Isolate* isolate,
                                 sqlite3_value* value,
                                 bool safe_ints);
-}
-namespace Data {
+#ifdef V8_HAS_LOCAL_VECTOR
 v8::Local<v8::Value> GetFlatRowJS(v8::Isolate* isolate,
                                   v8::Local<v8::Context> ctx,
                                   sqlite3_stmt* handle,
                                   bool safe_ints,
                                   std::vector<v8::Local<v8::Name>>& keys);
-}
-namespace Data {
+#else  // !V8_HAS_LOCAL_VECTOR
+v8::Local<v8::Value> GetFlatRowJS(v8::Isolate* isolate,
+                                  v8::Local<v8::Context> ctx,
+                                  sqlite3_stmt* handle,
+                                  bool safe_ints);
+#endif
 v8::Local<v8::Value> GetExpandedRowJS(v8::Isolate* isolate,
                                       v8::Local<v8::Context> ctx,
                                       sqlite3_stmt* handle,
                                       bool safe_ints);
-}
-namespace Data {
 v8::Local<v8::Value> GetRawRowJS(v8::Isolate* isolate,
                                  v8::Local<v8::Context> ctx,
                                  sqlite3_stmt* handle,
                                  bool safe_ints);
-}
-namespace Data {
+#ifdef V8_HAS_LOCAL_VECTOR
 v8::Local<v8::Value> GetRowJS(v8::Isolate* isolate,
                               v8::Local<v8::Context> ctx,
                               sqlite3_stmt* handle,
                               bool safe_ints,
                               char mode,
                               std::vector<v8::Local<v8::Name>>& keys);
-}
-namespace Data {
+#else  // !V8_HAS_LOCAL_VECTOR
+v8::Local<v8::Value> GetRowJS(v8::Isolate* isolate,
+                              v8::Local<v8::Context> ctx,
+                              sqlite3_stmt* handle,
+                              bool safe_ints,
+                              char mode);
+#endif
 void GetArgumentsJS(v8::Isolate* isolate,
                     v8::Local<v8::Value>* out,
                     sqlite3_value** values,
                     int argument_count,
                     bool safe_ints);
-}
-namespace Data {
 int BindValueFromJS(v8::Isolate* isolate,
                     sqlite3_stmt* handle,
                     int index,
                     v8::Local<v8::Value> value);
-}
-namespace Data {
 void ResultValueFromJS(v8::Isolate* isolate,
                        sqlite3_context* invocation,
                        v8::Local<v8::Value> value,
                        DataConverter* converter);
-}
+}  // namespace Data
 class Binder {
  public:
   explicit Binder(sqlite3_stmt* _handle);

@@ -34,15 +34,13 @@
     "sqlite3": "^5.0.2"
   },
   "scripts": {
-    "format": "xcrun clang-format --style=chromium -Werror --verbose -i *.h *.mm",
+    "format": "xcrun clang-format --style=chromium -Werror --verbose -i src/*.cpp src/*.hpp",
     "install": "npm run download && npm run build-release",
     "build-release": "node-gyp rebuild --release",
     "build-debug": "node-gyp rebuild --debug",
-    "rebuild-release": "npm run build-release",
-    "rebuild-debug": "npm run build-debug",
     "test": "mocha --exit --slow=75 --timeout=5000",
     "benchmark": "node benchmark",
-    "download": "node ./deps/download.js",
+    "download": "node ./deps/download.js"
   },
   "license": "MIT",
   "keywords": [
