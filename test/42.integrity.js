@@ -187,33 +187,6 @@ describe('integrity checks', function () {
 		});
 	});
 
-	describe('Database#loadExtension()', function () {
-		let filepath;
-		before(function () {
-			const releaseFilepath = path.join(__dirname, '..', 'build', 'Release', 'test_extension.node');
-			const debugFilepath = path.join(__dirname, '..', 'build', 'Debug', 'test_extension.node');
-			try {
-				fs.accessSync(releaseFilepath);
-				filepath = releaseFilepath;
-			} catch (_) {
-				fs.accessSync(debugFilepath);
-				filepath = debugFilepath;
-			}
-		});
-
-		specify('while iterating (blocked)', function () {
-			whileIterating(this, blocked(() => this.db.loadExtension(filepath)));
-			normally(allowed(() => this.db.loadExtension(filepath)));
-		});
-		specify('while busy (blocked)', function () {
-			whileBusy(this, blocked(() => this.db.loadExtension(filepath)));
-			normally(allowed(() => this.db.loadExtension(filepath)));
-		});
-		specify('while closed (blocked)', function () {
-			whileClosed(this, blocked(() => this.db.loadExtension(filepath)));
-		});
-	});
-
 	describe('Database#close()', function () {
 		specify('while iterating (blocked)', function () {
 			whileIterating(this, blocked(() => this.db.close()));

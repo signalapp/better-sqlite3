@@ -192,8 +192,6 @@ class Database : public node::ObjectWrap {
   static void JS_function(v8::FunctionCallbackInfo<v8 ::Value> const& info);
   static void JS_aggregate(v8::FunctionCallbackInfo<v8 ::Value> const& info);
   static void JS_table(v8::FunctionCallbackInfo<v8 ::Value> const& info);
-  static void JS_loadExtension(
-      v8::FunctionCallbackInfo<v8 ::Value> const& info);
   static void JS_close(v8::FunctionCallbackInfo<v8 ::Value> const& info);
   static void JS_defaultSafeIntegers(
       v8::FunctionCallbackInfo<v8 ::Value> const& info);
