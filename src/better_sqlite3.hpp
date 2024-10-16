@@ -16,17 +16,8 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include "local_vector.hpp"
 #include "signal-tokenizer.h"
-
-// See: https://github.com/v8/v8/commit/e1649301dfbfd34a448c3a0232c8a6206b716c73
-// Required V8 verison: 12.0.54 or higher
-
-#if V8_MAJOR_VERSION > 12 ||     \
-    V8_MINOR_VERSION == 12 &&    \
-        (V8_MINOR_VERSION > 0 || \
-         V8_MINOR_VERSION == 0 && V8_PATCH_VERSION >= 54)
-#define V8_HAS_LOCAL_VECTOR
-#endif
 
 template <class T>
 using CopyablePersistent = v8::Global<T>;
@@ -544,18 +535,11 @@ v8::Local<v8::Value> GetValueJS(v8::Isolate* isolate,
 v8::Local<v8::Value> GetValueJS(v8::Isolate* isolate,
                                 sqlite3_value* value,
                                 bool safe_ints);
-#ifdef V8_HAS_LOCAL_VECTOR
 v8::Local<v8::Value> GetFlatRowJS(v8::Isolate* isolate,
                                   v8::Local<v8::Context> ctx,
                                   sqlite3_stmt* handle,
                                   bool safe_ints,
-                                  v8::LocalVector<v8::Name>& keys);
-#else  // !V8_HAS_LOCAL_VECTOR
-v8::Local<v8::Value> GetFlatRowJS(v8::Isolate* isolate,
-                                  v8::Local<v8::Context> ctx,
-                                  sqlite3_stmt* handle,
-                                  bool safe_ints);
-#endif
+                                  LocalVector<v8::Name>& keys);
 v8::Local<v8::Value> GetExpandedRowJS(v8::Isolate* isolate,
                                       v8::Local<v8::Context> ctx,
                                       sqlite3_stmt* handle,
@@ -564,20 +548,12 @@ v8::Local<v8::Value> GetRawRowJS(v8::Isolate* isolate,
                                  v8::Local<v8::Context> ctx,
                                  sqlite3_stmt* handle,
                                  bool safe_ints);
-#ifdef V8_HAS_LOCAL_VECTOR
 v8::Local<v8::Value> GetRowJS(v8::Isolate* isolate,
                               v8::Local<v8::Context> ctx,
                               sqlite3_stmt* handle,
                               bool safe_ints,
                               char mode,
-                              v8::LocalVector<v8::Name>& keys);
-#else  // !V8_HAS_LOCAL_VECTOR
-v8::Local<v8::Value> GetRowJS(v8::Isolate* isolate,
-                              v8::Local<v8::Context> ctx,
-                              sqlite3_stmt* handle,
-                              bool safe_ints,
-                              char mode);
-#endif
+                              LocalVector<v8::Name>& keys);
 void GetArgumentsJS(v8::Isolate* isolate,
                     v8::Local<v8::Value>* out,
                     sqlite3_value** values,

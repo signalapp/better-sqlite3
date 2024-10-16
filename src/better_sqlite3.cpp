@@ -1258,16 +1258,10 @@ void Statement::JS_get(v8::FunctionCallbackInfo<v8 ::Value> const& info) {
   ((void)0);
   int status = sqlite3_step(handle);
   if (status == SQLITE_ROW) {
-#ifdef V8_HAS_LOCAL_VECTOR
-    v8::LocalVector<v8::Name> keys(isolate);
+    LocalVector<v8::Name> keys(isolate);
     v8::Local<v8::Value> result =
         Data::GetRowJS(isolate, isolate->GetCurrentContext(), handle,
                        stmt->safe_ints, stmt->mode, keys);
-#else  // !V8_HAS_LOCAL_VECTOR
-    v8::Local<v8::Value> result =
-        Data::GetRowJS(isolate, isolate->GetCurrentContext(), handle,
-                       stmt->safe_ints, stmt->mode);
-#endif
     sqlite3_reset(handle);
     db->GetState()->busy = false;
     info.GetReturnValue().Set(result);
@@ -1334,9 +1328,7 @@ void Statement::JS_all(v8::FunctionCallbackInfo<v8 ::Value> const& info) {
   const bool safe_ints = stmt->safe_ints;
   const char mode = stmt->mode;
   bool js_error = false;
-#ifdef V8_HAS_LOCAL_VECTOR
-  v8::LocalVector<v8::Name> keys(isolate);
-#endif  // V8_HAS_LOCAL_VECTOR
+  LocalVector<v8::Name> keys(isolate);
 
   while (sqlite3_step(handle) == SQLITE_ROW) {
     if (row_count == 0xffffffff) {
@@ -1344,13 +1336,8 @@ void Statement::JS_all(v8::FunctionCallbackInfo<v8 ::Value> const& info) {
       js_error = true;
       break;
     }
-#ifdef V8_HAS_LOCAL_VECTOR
     v8::Local<v8::Value> row =
         Data::GetRowJS(isolate, ctx, handle, safe_ints, mode, keys);
-#else  // !V8_HAS_LOCAL_VECTOR
-    v8::Local<v8::Value> row =
-        Data::GetRowJS(isolate, ctx, handle, safe_ints, mode);
-#endif
     result->Set(ctx, row_count++, row).FromJust();
   }
 
@@ -1676,14 +1663,9 @@ void StatementIterator::Next(v8::FunctionCallbackInfo<v8 ::Value> const& info) {
   if (status == SQLITE_ROW) {
     v8 ::Isolate* isolate = info.GetIsolate();
     v8 ::Local<v8 ::Context> ctx = isolate->GetCurrentContext();
-#ifdef V8_HAS_LOCAL_VECTOR
-    v8::LocalVector<v8::Name> keys(isolate);
+    LocalVector<v8::Name> keys(isolate);
     v8::Local<v8::Value> row =
         Data::GetRowJS(isolate, ctx, handle, safe_ints, mode, keys);
-#else  // !V8_HAS_LOCAL_VECTOR
-    v8::Local<v8::Value> row =
-        Data::GetRowJS(isolate, ctx, handle, safe_ints, mode);
-#endif
 
     info.GetReturnValue().Set(
         NewRecord(isolate, ctx, row, db_state->addon, false));
@@ -2466,12 +2448,24 @@ v8::Local<v8::Value> GetValueJS(v8::Isolate* isolate,
   assert(false);
   ;
 }
-#ifdef V8_HAS_LOCAL_VECTOR
 v8::Local<v8::Value> GetFlatRowJS(v8::Isolate* isolate,
                                   v8::Local<v8::Context> ctx,
                                   sqlite3_stmt* handle,
                                   bool safe_ints,
-                                  v8::LocalVector<v8::Name>& keys) {
+                                  LocalVector<v8::Name>& keys) {
+  if (!keys.is_supported()) {
+    v8::Local<v8::Object> row = v8::Object::New(isolate);
+    int column_count = sqlite3_column_count(handle);
+    for (int i = 0; i < column_count; ++i) {
+      row->Set(
+             ctx,
+             InternalizedFromUtf8(isolate, sqlite3_column_name(handle, i), -1),
+             Data::GetValueJS(isolate, handle, i, safe_ints))
+          .FromJust();
+    }
+    return row;
+  }
+
   if (keys.size() == 0) {
     int column_count = sqlite3_column_count(handle);
     keys.reserve(column_count);
@@ -2481,7 +2475,7 @@ v8::Local<v8::Value> GetFlatRowJS(v8::Isolate* isolate,
     }
   }
 
-  v8::LocalVector<v8::Value> values(isolate);
+  LocalVector<v8::Value> values(isolate);
   values.reserve(keys.size());
 
   for (size_t i = 0; i < keys.size(); ++i) {
@@ -2491,22 +2485,6 @@ v8::Local<v8::Value> GetFlatRowJS(v8::Isolate* isolate,
   return v8::Object::New(isolate, v8::Null(isolate), keys.data(), values.data(),
                          keys.size());
 }
-#else  // !V8_HAS_LOCAL_VECTOR
-v8::Local<v8::Value> GetFlatRowJS(v8::Isolate* isolate,
-                                  v8::Local<v8::Context> ctx,
-                                  sqlite3_stmt* handle,
-                                  bool safe_ints) {
-  v8::Local<v8::Object> row = v8::Object::New(isolate);
-  int column_count = sqlite3_column_count(handle);
-  for (int i = 0; i < column_count; ++i) {
-    row->Set(ctx,
-             InternalizedFromUtf8(isolate, sqlite3_column_name(handle, i), -1),
-             Data::GetValueJS(isolate, handle, i, safe_ints))
-        .FromJust();
-  }
-  return row;
-}
-#endif
 v8::Local<v8::Value> GetExpandedRowJS(v8::Isolate* isolate,
                                       v8::Local<v8::Context> ctx,
                                       sqlite3_stmt* handle,
@@ -2547,24 +2525,14 @@ v8::Local<v8::Value> GetRawRowJS(v8::Isolate* isolate,
   }
   return row;
 }
-#ifdef V8_HAS_LOCAL_VECTOR
 v8::Local<v8::Value> GetRowJS(v8::Isolate* isolate,
                               v8::Local<v8::Context> ctx,
                               sqlite3_stmt* handle,
                               bool safe_ints,
                               char mode,
-                              v8::LocalVector<v8::Name>& keys) {
+                              LocalVector<v8::Name>& keys) {
   if (mode == FLAT)
     return GetFlatRowJS(isolate, ctx, handle, safe_ints, keys);
-#else  // !V8_HAS_LOCAL_VECTOR
-v8::Local<v8::Value> GetRowJS(v8::Isolate* isolate,
-                              v8::Local<v8::Context> ctx,
-                              sqlite3_stmt* handle,
-                              bool safe_ints,
-                              char mode) {
-  if (mode == FLAT)
-    return GetFlatRowJS(isolate, ctx, handle, safe_ints);
-#endif
   if (mode == PLUCK)
     return GetValueJS(isolate, handle, 0, safe_ints);
   if (mode == EXPAND)
