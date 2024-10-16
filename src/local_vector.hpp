@@ -13,6 +13,9 @@
 
 template <class T>
 class LocalVector : public v8::LocalVector<T> {
+ public:
+  LocalVector(v8::Isolate* isolate) : v8::LocalVector<T>(isolate) {}
+
   inline bool is_supported() { return true; }
 };
 
