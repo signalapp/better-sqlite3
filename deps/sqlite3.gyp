@@ -74,6 +74,8 @@
             'libraries': [
               '-luserenv.lib',
               '-lntdll.lib',
+              '-lbcrypt.lib',
+              '-lcrypt32.lib',
               '-lsignal_sqlcipher_extension.lib'
             ],
             'library_dirs': [
