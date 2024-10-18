@@ -23,9 +23,7 @@
         'conditions': [
           ['OS == "win"', {
             'outputs': [
-              '<(SHARED_INTERMEDIATE_DIR)/sqlite3/>(openssl_root)/libssl.lib',
-              '<(SHARED_INTERMEDIATE_DIR)/sqlite3/>(openssl_root)/libcrypto.lib',
-              '<(SHARED_INTERMEDIATE_DIR)/sqlite3/signal-tokenizer/>(rust_arch)-pc-windows-msvc/signal_tokenizer.lib',
+              '<(SHARED_INTERMEDIATE_DIR)/sqlite3/signal-sqlcipher-extension/>(rust_arch)-pc-windows-msvc/signal_sqlcipher_extension.lib',
             ],
           }],
         ],
@@ -40,9 +38,7 @@
         ['OS == "win"', {
           'copies': [{
             'files': [
-              '<(SHARED_INTERMEDIATE_DIR)/sqlite3/>(openssl_root)/libssl.lib',
-              '<(SHARED_INTERMEDIATE_DIR)/sqlite3/>(openssl_root)/libcrypto.lib',
-              '<(SHARED_INTERMEDIATE_DIR)/sqlite3/signal-tokenizer/>(rust_arch)-pc-windows-msvc/signal_tokenizer.lib',
+              '<(SHARED_INTERMEDIATE_DIR)/sqlite3/signal-sqlcipher-extension/>(rust_arch)-pc-windows-msvc/signal_sqlcipher_extension.lib',
             ],
             'destination': '<(PRODUCT_DIR)',
           }],
@@ -56,13 +52,11 @@
       'sources': ['<(SHARED_INTERMEDIATE_DIR)/sqlite3/sqlite3.c'],
       'include_dirs': [
         '<(SHARED_INTERMEDIATE_DIR)/sqlite3/',
-        '<(SHARED_INTERMEDIATE_DIR)/sqlite3/openssl-include',
       ],
       'direct_dependent_settings': {
         'include_dirs': [
           '<(SHARED_INTERMEDIATE_DIR)/sqlite3/',
-          '<(SHARED_INTERMEDIATE_DIR)/sqlite3/openssl-include',
-          '<(SHARED_INTERMEDIATE_DIR)/sqlite3/signal-tokenizer/include',
+          '<(SHARED_INTERMEDIATE_DIR)/sqlite3/signal-sqlcipher-extension/include',
         ],
       },
       'cflags': ['-std=c99', '-w'],
@@ -78,14 +72,9 @@
           ],
           'link_settings': {
             'libraries': [
-              '-llibcrypto.lib',
-              '-llibssl.lib',
-              '-lws2_32.lib',
-              '-lcrypt32.lib',
-              '-lbcrypt.lib',
               '-luserenv.lib',
               '-lntdll.lib',
-              '-lsignal_tokenizer.lib',
+              '-lsignal_sqlcipher_extension.lib'
             ],
             'library_dirs': [
               '<(PRODUCT_DIR)',
@@ -93,22 +82,16 @@
           }
         },
         'OS == "mac"', {
-          'defines': [
-            'SQLCIPHER_CRYPTO_CC',
-          ],
           'link_settings': {
             'libraries': [
-              # This statically links libcrypto, whereas -lcrypto would dynamically link it
-              '<(SHARED_INTERMEDIATE_DIR)/sqlite3/signal-tokenizer/>(rust_arch)-apple-darwin/libsignal_tokenizer.a',
+              '<(SHARED_INTERMEDIATE_DIR)/sqlite3/signal-sqlcipher-extension/>(rust_arch)-apple-darwin/libsignal_sqlcipher_extension.a',
             ]
           }
         },
         { # Linux
           'link_settings': {
             'libraries': [
-              # This statically links libcrypto, whereas -lcrypto would dynamically link it
-              '<(SHARED_INTERMEDIATE_DIR)/sqlite3/OpenSSL-linux-<(target_arch)/libcrypto.a',
-              '<(SHARED_INTERMEDIATE_DIR)/sqlite3/signal-tokenizer/>(rust_arch)-unknown-linux-gnu/libsignal_tokenizer.a',
+              '<(SHARED_INTERMEDIATE_DIR)/sqlite3/signal-sqlcipher-extension/>(rust_arch)-unknown-linux-gnu/libsignal_sqlcipher_extension.a',
             ]
           }
         }],

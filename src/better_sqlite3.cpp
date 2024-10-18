@@ -496,9 +496,16 @@ void Database::JS_new(v8::FunctionCallbackInfo<v8 ::Value> const& info) {
              : must_exist ? SQLITE_OPEN_READWRITE
                           : (SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE);
 
+  int status;
+
+#if !defined(__APPLE__)
+  status = signal_register_crypto_provider();
+  assert(status == SQLITE_OK);
+#endif  // !defined(__APPLE__)
+
   if (sqlite3_open_v2(*utf8, &db_handle, mask, NULL) != SQLITE_OK) {
     ThrowSqliteError(addon, db_handle);
-    int status = sqlite3_close(db_handle);
+    status = sqlite3_close(db_handle);
     assert(status == SQLITE_OK);
     ((void)status);
     return;
@@ -511,7 +518,7 @@ void Database::JS_new(v8::FunctionCallbackInfo<v8 ::Value> const& info) {
       db_handle, SQLITE_LIMIT_LENGTH,
       MAX_BUFFER_SIZE < MAX_STRING_SIZE ? MAX_BUFFER_SIZE : MAX_STRING_SIZE);
   sqlite3_limit(db_handle, SQLITE_LIMIT_SQL_LENGTH, MAX_STRING_SIZE);
-  int status = sqlite3_db_config(db_handle, SQLITE_DBCONFIG_DEFENSIVE, 1, NULL);
+  status = sqlite3_db_config(db_handle, SQLITE_DBCONFIG_DEFENSIVE, 1, NULL);
   assert(status == SQLITE_OK);
 
   v8 ::Local<v8 ::Context> ctx = isolate->GetCurrentContext();

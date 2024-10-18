@@ -17,6 +17,7 @@
 #include <unordered_map>
 #include <vector>
 #include "local_vector.hpp"
+#include "signal-sqlcipher-ext.h"
 #include "signal-tokenizer.h"
 
 template <class T>
