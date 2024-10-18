@@ -30,9 +30,7 @@
     'SQLITE_ENABLE_JSON1',
     'SQLITE_INTROSPECTION_PRAGMAS',
 
-    # Only actually used on macOS. signal-sqlcipher-extension is used on other
-    # platforms
-    'SQLCIPHER_CRYPTO_CC',
+    'SQLCIPHER_CRYPTO_CUSTOM=signal_crypto_provider_setup',
 
     'HAVE_STDINT_H=1',
     'HAVE_INT8_T=1',
