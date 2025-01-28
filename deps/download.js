@@ -6,9 +6,9 @@ const { Transform } = require('stream');
 const { pipeline } = require('stream/promises');
 
 const BASE_URI = `https://build-artifacts.signal.org/desktop`;
-const HASH = '9d2afebba9bfd8f18afd36a90a800df84fcf6975defacbfa1e1c5e1e8a6d05f1';
+const HASH = '8f4468fc11e54645cb974403d81650ed4f1a81817d9110369aa57fea567a4d51';
 const SQLCIPHER_VERSION = '4.6.1-signal-patch2';
-const EXTENSION_VERSION = '0.2.1';
+const EXTENSION_VERSION = '0.2.1-asm';
 const TAG = [SQLCIPHER_VERSION, EXTENSION_VERSION].join('--');
 const URL = `${BASE_URI}/sqlcipher-v2-${TAG}-${HASH}.tar.gz`;
 
