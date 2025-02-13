@@ -12,22 +12,26 @@ const EXTENSION_VERSION = '0.2.1-asm2';
 const TAG = [SQLCIPHER_VERSION, EXTENSION_VERSION].join('--');
 const URL = `${BASE_URI}/sqlcipher-v2-${TAG}-${HASH}.tar.gz`;
 
-const tmpFile = path.join(__dirname, 'unverified.tmp');
-const finalFile = path.join(__dirname, 'sqlcipher.tar.gz');
+const buildFile = process.argv[2];
+const targetFile = path.join(__dirname, 'sqlcipher.tar.gz');
+const tmpFile = `${targetFile}.tmp`;
 
 async function main() {
-  if (fs.statSync(finalFile, { throwIfNoEntry: false })) {
+  if (fs.statSync(targetFile, { throwIfNoEntry: false })) {
     const hash = crypto.createHash('sha256');
     const existingHash = await pipeline(
-      fs.createReadStream(finalFile),
+      fs.createReadStream(targetFile),
       hash,
     );
     if (hash.digest('hex') === HASH) {
       console.log('local build artifact is up-to-date');
+      fs.copyFileSync(targetFile, buildFile);
       return;
     }
 
     console.log('local build artifact is outdated');
+  } else {
+    console.log('local build artifact is absent');
   }
   download();
 }
@@ -54,8 +58,9 @@ function download() {
       throw new Error(`Digest mismatch. Expected ${HASH} got ${actualDigest}`);
     }
 
-    fs.renameSync(tmpFile, finalFile);
-  })
+    fs.renameSync(tmpFile, targetFile);
+    fs.copyFileSync(targetFile, buildFile);
+  });
 }
 
 main();

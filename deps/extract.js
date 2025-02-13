@@ -2,8 +2,8 @@
 const path = require('path');
 const tar = require('tar');
 
-const dest = process.argv[2];
-const source = path.join(__dirname, 'sqlcipher.tar.gz');
+const source = process.argv[2];
+const dest = process.argv[3];
 
 process.on('unhandledRejection', (err) => { throw err; });
 

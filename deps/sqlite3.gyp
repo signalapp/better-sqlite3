@@ -9,12 +9,25 @@
   'includes': ['common.gypi'],
   'targets': [
     {
+      'target_name': 'download_sqlite3',
+      'type': 'none',
+      'hard_dependency': 1,
+      'actions': [{
+        'action_name': 'download_sqlite3',
+        'inputs': ['download.js'],
+        'outputs': [
+          '<(SHARED_INTERMEDIATE_DIR)/sqlcipher.tar.gz'
+        ],
+        'action': ['node', 'download.js', '<(SHARED_INTERMEDIATE_DIR)/sqlcipher.tar.gz'],
+      }],
+    },
+    {
       'target_name': 'locate_sqlite3',
       'type': 'none',
       'hard_dependency': 1,
       'actions': [{
         'action_name': 'extract_sqlite3',
-        'inputs': ['sqlcipher.tar.gz'],
+        'inputs': ['<(SHARED_INTERMEDIATE_DIR)/sqlcipher.tar.gz'],
         'outputs': [
           '<(SHARED_INTERMEDIATE_DIR)/sqlite3/sqlite3.c',
           '<(SHARED_INTERMEDIATE_DIR)/sqlite3/sqlite3.h',
@@ -27,7 +40,7 @@
             ],
           }],
         ],
-        'action': ['node', 'extract.js', '<(SHARED_INTERMEDIATE_DIR)/sqlite3'],
+        'action': ['node', 'extract.js', '<(SHARED_INTERMEDIATE_DIR)/sqlcipher.tar.gz', '<(SHARED_INTERMEDIATE_DIR)/sqlite3'],
       }],
     },
     {
