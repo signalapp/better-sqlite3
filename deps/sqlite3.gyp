@@ -24,7 +24,7 @@
     {
       'target_name': 'locate_sqlite3',
       'type': 'none',
-      'hard_dependency': 1,
+      'dependencies': ['download_sqlite3'],
       'actions': [{
         'action_name': 'extract_sqlite3',
         'inputs': ['<(SHARED_INTERMEDIATE_DIR)/sqlcipher.tar.gz'],
